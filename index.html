@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasklight — Track work. See progress.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ══════════════════════════════════════
+   THEME TOKENS
+══════════════════════════════════════ */
+:root {
+  --accent:   #c84bff;
+  --accent2:  #ff4bb8;
+  --accent3:  #7c5bff;
+  --green:    #4bffb8;
+  --red:      #ff4b6e;
+  --yellow:   #ffd84b;
+  --trans: all .25s cubic-bezier(.4,0,.2,1);
+}
+
+[data-theme="dark"] {
+  --bg:         #0d0b1a;
+  --bg2:        #080712;
+  --surface:    #14112b;
+  --card:       #1a1630;
+  --card-hover: #201c3a;
+  --border:     #2a2545;
+  --border2:    #1f1c35;
+  --text:       #e8e4f8;
+  --text2:      #c2bde0;
+  --muted:      #7a7298;
+  --nav-bg:     rgba(13,11,26,0.88);
+  --input-bg:   #110f24;
+  --chart-grid: rgba(255,255,255,0.06);
+  --shadow:     0 8px 32px rgba(0,0,0,.5);
+}
+
+[data-theme="light"] {
+  --bg:         #f4f2fc;
+  --bg2:        #ebe8f8;
+  --surface:    #ffffff;
+  --card:       #ffffff;
+  --card-hover: #f0edf9;
+  --border:     #ddd8f0;
+  --border2:    #e8e4f5;
+  --text:       #1a1535;
+  --text2:      #3d3560;
+  --muted:      #7c74a8;
+  --nav-bg:     rgba(244,242,252,0.92);
+  --input-bg:   #f8f6fe;
+  --chart-grid: rgba(0,0,0,0.06);
+  --shadow:     0 4px 20px rgba(100,80,200,.1);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background .3s, color .3s;
+}
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 40px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 200;
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  transition: background .3s, border-color .3s;
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  display: grid; place-items: center; font-size: 19px;
+  box-shadow: 0 4px 16px rgba(124,91,255,.35);
+}
+.logo-text h1 { font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.logo-text p  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.nav-right { display: flex; gap: 10px; align-items: center; }
+
+.streak-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 20px;
+  border: 1px solid var(--border); font-size: 13px; font-weight: 600;
+  background: var(--surface); color: var(--text);
+  transition: var(--trans);
+}
+.streak-num { color: var(--accent2); }
+
+.nav-btn {
+  padding: 7px 15px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font-size: 13px; cursor: pointer;
+  font-family: inherit; font-weight: 500;
+  transition: var(--trans);
+}
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Theme toggle */
+.theme-toggle {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface);
+  display: grid; place-items: center; cursor: pointer;
+  font-size: 16px; transition: var(--trans); color: var(--text);
+}
+.theme-toggle:hover { border-color: var(--accent); transform: rotate(20deg); }
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+.hero { padding: 48px 40px 32px; max-width: 880px; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px;
+  margin-bottom: 20px; background: var(--surface);
+}
+.hero h2 {
+  font-size: clamp(28px, 4vw, 50px);
+  font-weight: 900; line-height: 1.08; letter-spacing: -.03em; margin-bottom: 14px;
+}
+.grad1 { background: linear-gradient(90deg, var(--accent), var(--accent3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.grad2 { background: linear-gradient(90deg, var(--accent2), var(--accent));  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero p { color: var(--muted); font-size: 15px; line-height: 1.65; max-width: 540px; }
+
+/* ══════════════════════════════════════
+   STATS ROW
+══════════════════════════════════════ */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 14px; padding: 0 40px 32px;
+}
+.stat-card {
+  background: var(--card); border-radius: 18px;
+  border: 1px solid var(--border); padding: 22px 22px 18px;
+  transition: var(--trans); position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  opacity: 0; transition: opacity .3s;
+  border-radius: inherit;
+}
+.stat-card:hover { border-color: var(--accent3); box-shadow: var(--shadow); transform: translateY(-2px); }
+.stat-card:hover::before { opacity: .04; }
+.stat-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px; position: relative;
+}
+.stat-icon { font-size: 15px; opacity: .5; }
+.stat-value { font-size: 40px; font-weight: 900; line-height: 1; letter-spacing: -.04em; position: relative; }
+.stat-bar-wrap { margin-top: 14px; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; position: relative; }
+.stat-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .8s cubic-bezier(.4,0,.2,1); }
+
+/* ══════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════ */
+.main-wrap { padding: 0 40px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+.top-grid {
+  display: grid; grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+
+.charts-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ══════════════════════════════════════
+   PANELS
+══════════════════════════════════════ */
+.panel {
+  background: var(--card); border-radius: 20px;
+  border: 1px solid var(--border); padding: 26px;
+  transition: background .3s, border-color .3s;
+  box-shadow: var(--shadow);
+}
+.panel-header { margin-bottom: 20px; }
+.panel-header h3 { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.panel-header p  { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+/* ══════════════════════════════════════
+   ADD FORM
+══════════════════════════════════════ */
+.add-form { margin-bottom: 22px; }
+.input-field {
+  width: 100%; background: var(--input-bg); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text); font-family: inherit;
+  font-size: 14px; padding: 11px 15px; margin-bottom: 9px;
+  transition: var(--trans); resize: none; outline: none;
+}
+.input-field::placeholder { color: var(--muted); }
+.input-field:focus { border-color: var(--accent3); box-shadow: 0 0 0 3px rgba(124,91,255,.12); }
+.form-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.select-pill {
+  padding: 7px 13px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--input-bg);
+  color: var(--text); font-size: 13px; font-family: inherit;
+  cursor: pointer; outline: none; transition: var(--trans);
+}
+.select-pill:focus { border-color: var(--accent3); }
+.add-btn {
+  margin-left: auto; padding: 8px 20px; border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent3), var(--accent2));
+  border: none; color: #fff; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: var(--trans);
+  white-space: nowrap; letter-spacing: .01em;
+  box-shadow: 0 4px 16px rgba(200,75,255,.3);
+}
+.add-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,75,255,.4); }
+.add-btn:active { transform: scale(.97); }
+
+/* ══════════════════════════════════════
+   FILTER TABS
+══════════════════════════════════════ */
+.filter-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px;
+  font-weight: 600; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); cursor: pointer;
+  font-family: inherit; transition: var(--trans);
+}
+.filter-tab:hover { background: var(--surface); color: var(--text2); border-color: var(--accent3); }
+.filter-tab.active { background: var(--surface); color: var(--accent); border-color: var(--accent); }
+
+/* ══════════════════════════════════════
+   TASK LIST
+══════════════════════════════════════ */
+.task-list { display: flex; flex-direction: column; gap: 7px; max-height: 440px; overflow-y: auto; padding-right: 2px; }
+.task-list::-webkit-scrollbar { width: 4px; }
+.task-list::-webkit-scrollbar-track { background: transparent; }
+.task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+.task-item {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 13px 14px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border2);
+  transition: var(--trans); animation: slideIn .25s ease;
+}
+@keyframes slideIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
+.task-item:hover { border-color: var(--accent3); background: var(--card-hover); }
+.task-item.done { opacity: .45; }
+.task-item.done .task-title { text-decoration: line-through; color: var(--muted); }
+
+.task-check {
+  width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+  border: 2px solid var(--border); background: transparent; cursor: pointer;
+  transition: var(--trans); display: grid; place-items: center;
+}
+.task-check:hover { border-color: var(--accent); }
+.task-check.checked { background: linear-gradient(135deg, var(--accent3), var(--accent)); border-color: transparent; }
+.check-mark { color: #fff; font-size: 10px; display: none; font-weight: 900; }
+.task-check.checked .check-mark { display: block; }
+
+.task-body { flex: 1; min-width: 0; }
+.task-title { font-size: 13.5px; font-weight: 500; margin-bottom: 3px; line-height: 1.4; }
+.task-notes { font-size: 12px; color: var(--muted); margin-bottom: 6px; line-height: 1.4; }
+.task-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.meta-tag {
+  font-size: 10.5px; padding: 2px 8px; border-radius: 20px;
+  font-weight: 600; letter-spacing: .02em;
+}
+.tag-high   { background: rgba(255,75,110,.14); color: var(--red); }
+.tag-medium { background: rgba(255,75,184,.14); color: var(--accent2); }
+.tag-low    { background: rgba(75,255,184,.14);  color: var(--green); }
+.tag-date   { background: var(--border); color: var(--muted); font-weight: 400; }
+.tag-cat    { background: rgba(124,91,255,.14); color: var(--accent3); }
+
+.task-del {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 18px; padding: 2px 5px; border-radius: 6px;
+  transition: var(--trans); line-height: 1; flex-shrink: 0;
+}
+.task-del:hover { color: var(--red); background: rgba(255,75,110,.1); }
+
+.empty-state { text-align: center; padding: 44px 20px; color: var(--muted); }
+.empty-state .ei { font-size: 36px; margin-bottom: 10px; }
+.empty-state p { font-size: 13px; }
+
+/* ══════════════════════════════════════
+   RIGHT COLUMN (donut + activity)
+══════════════════════════════════════ */
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+
+.chart-center { display: flex; justify-content: center; margin: 14px 0 12px; }
+.legend { display: flex; flex-direction: column; gap: 9px; }
+.legend-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.legend-label { display: flex; align-items: center; gap: 8px; color: var(--text2); }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.legend-count { font-weight: 700; color: var(--text); }
+
+/* Activity grid */
+.week-labels { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 5px; }
+.week-label { font-size: 9px; color: var(--muted); text-align: center; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.streak-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.day-cell { aspect-ratio:1; border-radius: 3px; background: var(--border); cursor: default; transition: background .2s; }
+.day-cell:hover { transform: scale(1.2); }
+.day-cell.lvl1 { background: rgba(124,91,255,.3); }
+.day-cell.lvl2 { background: rgba(124,91,255,.55); }
+.day-cell.lvl3 { background: var(--accent3); }
+.day-cell.lvl4 { background: var(--accent); }
+
+/* ══════════════════════════════════════
+   CANVAS CHARTS (trend + bar)
+══════════════════════════════════════ */
+.chart-canvas-wrap { position: relative; width: 100%; }
+canvas.full-chart { width: 100% !important; display: block; }
+
+.chart-legend-row {
+  display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap;
+}
+.cl-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.cl-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 1000px) {
+  .top-grid { grid-template-columns: 1fr; }
+  .right-col { flex-direction: row; }
+  .right-col .panel { flex: 1; }
+}
+@media (max-width: 720px) {
+  nav, .hero, .stats-row, .main-wrap { padding-left: 16px; padding-right: 16px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .charts-grid { grid-template-columns: 1fr; }
+  .right-col { flex-direction: column; }
+  .nav-btn { display: none; }
+  .hero { padding-top: 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🎯</div>
+    <div class="logo-text"><h1>Tasklight</h1><p>Track work. See progress.</p></div>
+  </div>
+  <div class="nav-right">
+    <div class="streak-pill">🔥 <span class="streak-num" id="streakNum">0</span> day streak</div>
+    <button class="nav-btn" onclick="exportTasks()">↓ Export</button>
+    <button class="nav-btn" onclick="clearDone()">Clear done</button>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">✦ Your day at a glance</div>
+  <h2>Get things done —<br>and <span class="grad1">see how</span><br><span class="grad2">it's going</span>.</h2>
+  <p>Capture tasks, set priorities and due dates, and watch trends emerge. Your data stays on this device.</p>
+</section>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">Total <span class="stat-icon">☰</span></div>
+    <div class="stat-value" id="statTotal">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Active <span class="stat-icon">○</span></div>
+    <div class="stat-value" id="statActive">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Overdue <span class="stat-icon">⚠</span></div>
+    <div class="stat-value" id="statOverdue">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Completion <span class="stat-icon">↗</span></div>
+    <div class="stat-value" id="statCompletion">0%</div>
+    <div class="stat-bar-wrap"><div class="stat-bar" id="statBar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- TOP: tasks + right sidebar -->
+  <div class="top-grid">
+
+    <!-- TASKS PANEL -->
+    <div class="panel">
+      <div class="panel-header"><h3>Your tasks</h3><p>Add, prioritize, and check off your work.</p></div>
+      <div class="add-form">
+        <input class="input-field" id="taskTitle" type="text" placeholder="What needs doing?" autocomplete="off">
+        <textarea class="input-field" id="taskNotes" rows="2" placeholder="Add notes (optional)"></textarea>
+        <div class="form-controls">
+          <select class="select-pill" id="taskPriority">
+            <option value="High">🔴 High</option>
+            <option value="Medium" selected>🟣 Medium</option>
+            <option value="Low">🟢 Low</option>
+          </select>
+          <input class="select-pill" id="taskDue" type="date" style="padding:6px 12px;">
+          <input class="select-pill" id="taskCat" type="text" placeholder="Category" style="min-width:100px;">
+          <button class="add-btn" onclick="addTask()">+ Add task</button>
+        </div>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-tab" onclick="setFilter('active',this)">Active</button>
+        <button class="filter-tab" onclick="setFilter('done',this)">Done</button>
+        <button class="filter-tab" onclick="setFilter('overdue',this)">Overdue</button>
+      </div>
+      <div class="task-list" id="taskList"></div>
+    </div>
+
+    <!-- RIGHT: donut + activity -->
+    <div class="right-col">
+      <div class="panel">
+        <div class="panel-header"><h3>Priority mix</h3><p>How your workload breaks down.</p></div>
+        <div class="chart-center"><canvas id="donut" width="156" height="156"></canvas></div>
+        <div class="legend" id="donutLegend"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Activity</h3><p>Tasks completed in the last 4 weeks.</p></div>
+        <div class="week-labels">
+          <div class="week-label">M</div><div class="week-label">T</div><div class="week-label">W</div>
+          <div class="week-label">T</div><div class="week-label">F</div><div class="week-label">S</div><div class="week-label">S</div>
+        </div>
+        <div class="streak-grid" id="activityGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM: trend + priority bar -->
+  <div class="charts-grid">
+
+    <div class="panel">
+      <div class="panel-header"><h3>Completion trend</h3><p>Completed vs. created over the last 7 days.</p></div>
+      <div class="chart-canvas-wrap"><canvas id="trendChart" class="full-chart" height="180"></canvas></div>
+      <div class="chart-legend-row">
+        <div class="cl-item"><div class="cl-dot" style="background:#ff4bb8"></div>Completed</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#7c5bff"></div>Created</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><h3>Progress by priority</h3><p>Completed vs. remaining for each tier.</p></div>
+      <div class="chart-canvas-wrap"><canvas id="barChart" class="full-chart" height="180"></canvas></div>
+      <div class="chart-legend-row">
+        <div class="cl-item"><div class="cl-dot" style="background:#ff4bb8"></div>Done</div>
+        <div class="cl-item"><div class="cl-dot" style="background:rgba(124,91,255,.45)"></div>Remaining</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   STATE & PERSISTENCE
+══════════════════════════════════════ */
+let allTasks = JSON.parse(localStorage.getItem('tl_tasks') || '[]');
+let currentFilter = 'all';
+const TODAY = new Date().toISOString().split('T')[0];
+
+function save() { localStorage.setItem('tl_tasks', JSON.stringify(allTasks)); }
+
+/* ══════════════════════════════════════
+   THEME
+══════════════════════════════════════ */
+const storedTheme = localStorage.getItem('tl_theme') || 'dark';
+document.documentElement.setAttribute('data-theme', storedTheme);
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('tl_theme', next);
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+  drawAllCharts();
+}
+document.getElementById('themeBtn').textContent = storedTheme === 'dark' ? '🌙' : '☀️';
+
+/* ══════════════════════════════════════
+   STATS
+══════════════════════════════════════ */
+function computeStats(tasks) {
+  const total = tasks.length;
+  const done  = tasks.filter(t=>t.done).length;
+  const active= tasks.filter(t=>!t.done).length;
+  const over  = tasks.filter(t=>!t.done&&t.due_date&&t.due_date<TODAY).length;
+  const pct   = total ? Math.round(done/total*100) : 0;
+  const pc    = {High:0,Medium:0,Low:0};
+  tasks.forEach(t=>{ pc[t.priority]=(pc[t.priority]||0)+1; });
+  return {total,done,active,overdue:over,completion:pct,priority_counts:pc};
+}
+
+function updateStats(s) {
+  document.getElementById('statTotal').textContent = s.total;
+  document.getElementById('statActive').textContent = s.active;
+  document.getElementById('statOverdue').textContent = s.overdue;
+  document.getElementById('statCompletion').textContent = s.completion+'%';
+  document.getElementById('statBar').style.width = s.completion+'%';
+}
+
+/* ══════════════════════════════════════
+   TASK CRUD
+══════════════════════════════════════ */
+function addTask() {
+  const title = document.getElementById('taskTitle').value.trim();
+  if (!title) { document.getElementById('taskTitle').focus(); return; }
+  allTasks.push({
+    id: crypto.randomUUID(), title,
+    notes: document.getElementById('taskNotes').value.trim(),
+    priority: document.getElementById('taskPriority').value,
+    due_date: document.getElementById('taskDue').value,
+    category: document.getElementById('taskCat').value.trim(),
+    done: false,
+    created_at: new Date().toISOString()
+  });
+  save(); refresh();
+  ['taskTitle','taskNotes','taskDue','taskCat'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('taskPriority').value='Medium';
+}
+
+function toggleDone(id) {
+  const t = allTasks.find(t=>t.id===id);
+  if (t) { t.done=!t.done; t.done_at = t.done ? new Date().toISOString() : null; }
+  save(); refresh();
+}
+
+function deleteTask(id) {
+  allTasks = allTasks.filter(t=>t.id!==id);
+  save(); refresh();
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+
+function getFiltered() {
+  return allTasks.filter(t=>{
+    if (currentFilter==='active') return !t.done;
+    if (currentFilter==='done')   return t.done;
+    if (currentFilter==='overdue') return !t.done&&t.due_date&&t.due_date<TODAY;
+    return true;
+  });
+}
+
+/* ══════════════════════════════════════
+   RENDER TASKS
+══════════════════════════════════════ */
+function esc(s='') {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  const tasks = getFiltered();
+  if (!tasks.length) {
+    list.innerHTML='<div class="empty-state"><div class="ei">✦</div><p>No tasks here. Add one above!</p></div>';
+    return;
+  }
+  list.innerHTML = tasks.map(t=>`
+    <div class="task-item${t.done?' done':''}">
+      <div class="task-check${t.done?' checked':''}" onclick="toggleDone('${t.id}')">
+        <span class="check-mark">✓</span>
+      </div>
+      <div class="task-body">
+        <div class="task-title">${esc(t.title)}</div>
+        ${t.notes?`<div class="task-notes">${esc(t.notes)}</div>`:''}
+        <div class="task-meta">
+          <span class="meta-tag tag-${t.priority.toLowerCase()}">${t.priority}</span>
+          ${t.due_date?`<span class="meta-tag tag-date">📅 ${t.due_date}</span>`:''}
+          ${t.category?`<span class="meta-tag tag-cat">${esc(t.category)}</span>`:''}
+        </div>
+      </div>
+      <button class="task-del" onclick="deleteTask('${t.id}')">×</button>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   ACTIVITY + STREAK
+══════════════════════════════════════ */
+function renderActivity() {
+  const grid=document.getElementById('activityGrid');
+  const cells=[];
+  for (let i=27;i>=0;i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=d.toISOString().split('T')[0];
+    const n=allTasks.filter(t=>t.done&&(t.done_at||t.created_at||'').startsWith(ds)).length;
+    const lvl=n===0?'':n===1?'lvl1':n<=3?'lvl2':n<=5?'lvl3':'lvl4';
+    cells.push(`<div class="day-cell ${lvl}" title="${ds}: ${n} done"></div>`);
+  }
+  grid.innerHTML=cells.join('');
+}
+
+function updateStreak() {
+  let s=0,d=new Date();
+  for(;;){
+    const ds=d.toISOString().split('T')[0];
+    const has=allTasks.some(t=>t.done&&(t.done_at||'').startsWith(ds));
+    if(!has) break; s++; d.setDate(d.getDate()-1);
+  }
+  document.getElementById('streakNum').textContent=s;
+}
+
+/* ══════════════════════════════════════
+   CSS VAR HELPER
+══════════════════════════════════════ */
+function cssVar(v) {
+  return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+}
+
+/* ══════════════════════════════════════
+   DONUT CHART
+══════════════════════════════════════ */
+function drawDonut(counts) {
+  const canvas=document.getElementById('donut');
+  const ctx=canvas.getContext('2d');
+  const data=[
+    {label:'High',  value:counts.High  ||0,color:'#ff4b6e'},
+    {label:'Medium',value:counts.Medium||0,color:'#ff4bb8'},
+    {label:'Low',   value:counts.Low   ||0,color:'#4bffb8'},
+  ];
+  const total=data.reduce((s,d)=>s+d.value,0);
+  const cx=78,cy=78,r=64,ir=38;
+  ctx.clearRect(0,0,156,156);
+
+  if(!total){
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.arc(cx,cy,ir,0,Math.PI*2,true);
+    ctx.fillStyle=cssVar('--border'); ctx.fill('evenodd');
+  } else {
+    let start=-Math.PI/2;
+    data.forEach(d=>{
+      if(!d.value) return;
+      const angle=(d.value/total)*Math.PI*2;
+      ctx.beginPath(); ctx.arc(cx,cy,r,start,start+angle);
+      ctx.arc(cx,cy,ir,start+angle,start,true); ctx.closePath();
+      ctx.fillStyle=d.color; ctx.fill(); start+=angle+0.025;
+    });
+  }
+  const textCol=cssVar('--text');
+  const mutedCol=cssVar('--muted');
+  ctx.fillStyle=textCol; ctx.font='bold 24px Inter,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(total,cx,cy-9);
+  ctx.fillStyle=mutedCol; ctx.font='500 11px Inter,sans-serif';
+  ctx.fillText('tasks',cx,cx+13);
+
+  document.getElementById('donutLegend').innerHTML=data.map(d=>`
+    <div class="legend-row">
+      <span class="legend-label"><span class="legend-dot" style="background:${d.color}"></span>${d.label}</span>
+      <span class="legend-count">${d.value}</span>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   TREND LINE CHART
+══════════════════════════════════════ */
+function drawTrend() {
+  const canvas=document.getElementById('trendChart');
+  const W=canvas.offsetWidth; const H=180;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+
+  // last 7 days
+  const days=[],created=[],completed=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=d.toISOString().split('T')[0];
+    days.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]);
+    created.push(allTasks.filter(t=>t.created_at&&t.created_at.startsWith(ds)).length);
+    completed.push(allTasks.filter(t=>t.done&&(t.done_at||t.created_at||'').startsWith(ds)).length);
+  }
+
+  const pad={l:32,r:16,t:16,b:40};
+  const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  const maxV=Math.max(...created,...completed,4);
+  const gridLines=4;
+
+  const gridCol=cssVar('--chart-grid');
+  const mutedCol=cssVar('--muted');
+  const textCol=cssVar('--text');
+
+  ctx.clearRect(0,0,W,H);
+
+  // grid + y-labels
+  for(let i=0;i<=gridLines;i++){
+    const y=pad.t+ch-(ch*i/gridLines);
+    ctx.strokeStyle=gridCol; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=mutedCol; ctx.font='10px Inter,sans-serif';
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(Math.round(maxV*i/gridLines),pad.l-6,y);
+  }
+
+  function xPos(i){ return pad.l+i*(cw/(days.length-1)); }
+  function yPos(v){ return pad.t+ch-(v/maxV)*ch; }
+
+  function drawLine(data,color,fill){
+    ctx.beginPath();
+    data.forEach((v,i)=>{ i===0?ctx.moveTo(xPos(i),yPos(v)):ctx.lineTo(xPos(i),yPos(v)); });
+    if(fill){
+      ctx.lineTo(xPos(data.length-1),pad.t+ch);
+      ctx.lineTo(xPos(0),pad.t+ch); ctx.closePath();
+      const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);
+      grad.addColorStop(0,color.replace(')',',0.35)').replace('rgb','rgba'));
+      grad.addColorStop(1,color.replace(')',',0)').replace('rgb','rgba'));
+      ctx.fillStyle=grad; ctx.fill();
+    }
+    ctx.beginPath();
+    data.forEach((v,i)=>{ i===0?ctx.moveTo(xPos(i),yPos(v)):ctx.lineTo(xPos(i),yPos(v)); });
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.lineCap='round';
+    ctx.setLineDash([]); ctx.stroke();
+    // dots
+    data.forEach((v,i)=>{
+      ctx.beginPath(); ctx.arc(xPos(i),yPos(v),3.5,0,Math.PI*2);
+      ctx.fillStyle=color; ctx.fill();
+    });
+  }
+
+  drawLine(completed,'#ff4bb8',true);
+  drawLine(created,'#7c5bff',false);
+
+  // x labels
+  days.forEach((d,i)=>{
+    ctx.fillStyle=mutedCol; ctx.font='10px Inter,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(d,xPos(i),pad.t+ch+8);
+  });
+}
+
+/* ══════════════════════════════════════
+   STACKED BAR CHART
+══════════════════════════════════════ */
+function drawBar() {
+  const canvas=document.getElementById('barChart');
+  const W=canvas.offsetWidth; const H=180;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+
+  const priorities=['High','Medium','Low'];
+  const doneData = priorities.map(p=>allTasks.filter(t=>t.priority===p&&t.done).length);
+  const remData  = priorities.map(p=>allTasks.filter(t=>t.priority===p&&!t.done).length);
+  const totals   = priorities.map((_,i)=>doneData[i]+remData[i]);
+  const maxV=Math.max(...totals,4);
+  const pad={l:32,r:16,t:16,b:40};
+  const cw=W-pad.l-pad.r; const ch=H-pad.t-pad.b;
+  const gridLines=4;
+
+  const gridCol=cssVar('--chart-grid');
+  const mutedCol=cssVar('--muted');
+
+  ctx.clearRect(0,0,W,H);
+
+  for(let i=0;i<=gridLines;i++){
+    const y=pad.t+ch-ch*i/gridLines;
+    ctx.strokeStyle=gridCol; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=mutedCol; ctx.font='10px Inter,sans-serif';
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(Math.round(maxV*i/gridLines),pad.l-6,y);
+  }
+
+  const barW=Math.min(56,cw/priorities.length*0.5);
+  const spacing=cw/priorities.length;
+
+  priorities.forEach((p,i)=>{
+    const x=pad.l+spacing*i+spacing/2-barW/2;
+    const doneH=(doneData[i]/maxV)*ch;
+    const remH=(remData[i]/maxV)*ch;
+    const radius=6;
+
+    // remaining (bottom segment shows full bar bg)
+    const totalH=doneH+remH;
+    if(totalH>0){
+      // full rounded top bar (remaining)
+      ctx.beginPath();
+      const ty=pad.t+ch-totalH;
+      ctx.moveTo(x+radius,ty);
+      ctx.lineTo(x+barW-radius,ty);
+      ctx.quadraticCurveTo(x+barW,ty,x+barW,ty+radius);
+      ctx.lineTo(x+barW,pad.t+ch);
+      ctx.lineTo(x,pad.t+ch);
+      ctx.lineTo(x,ty+radius);
+      ctx.quadraticCurveTo(x,ty,x+radius,ty);
+      ctx.closePath();
+      ctx.fillStyle='rgba(124,91,255,0.28)';
+      ctx.fill();
+
+      // done (bottom part, flat top)
+      if(doneH>0){
+        const dy=pad.t+ch-doneH;
+        ctx.fillStyle='#ff4bb8';
+        ctx.fillRect(x,dy,barW,doneH);
+      }
+    }
+
+    // label
+    ctx.fillStyle=mutedCol; ctx.font='500 11px Inter,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(p,x+barW/2,pad.t+ch+10);
+  });
+}
+
+/* ══════════════════════════════════════
+   ORCHESTRATE
+══════════════════════════════════════ */
+function drawAllCharts() {
+  const s=computeStats(allTasks);
+  drawDonut(s.priority_counts);
+  drawTrend();
+  drawBar();
+}
+
+function refresh() {
+  const s=computeStats(allTasks);
+  updateStats(s);
+  renderTasks();
+  renderActivity();
+  updateStreak();
+  drawAllCharts();
+}
+
+/* ══════════════════════════════════════
+   UTILS
+══════════════════════════════════════ */
+function exportTasks() {
+  const b=new Blob([JSON.stringify(allTasks,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download='tasklight-export.json'; a.click();
+}
+function clearDone() { allTasks=allTasks.filter(t=>!t.done); save(); refresh(); }
+
+document.getElementById('taskTitle').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addTask();}
+});
+
+window.addEventListener('resize', ()=>{ drawTrend(); drawBar(); });
+
+// Boot
+refresh();
+</script>
+</body>
+</html>
