@@ -156,6 +156,33 @@ nav{
 
 .nav-right{display:flex;gap:9px;align-items:center}
 
+/* ── PAGE TABS ── */
+.page-tabs{
+  display:flex;gap:4px;background:var(--surface);
+  border:1px solid var(--border);border-radius:20px;padding:4px;
+}
+.page-tab{
+  padding:8px 18px;border-radius:16px;border:none;
+  background:transparent;color:var(--muted);
+  font-family:inherit;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .25s var(--ease);
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.page-tab:hover{color:var(--text2)}
+.page-tab.active{
+  background:linear-gradient(135deg,var(--a3),var(--a1));
+  color:#fff;
+  box-shadow:0 4px 16px rgba(124,91,255,.35);
+}
+
+/* ── PAGE SECTIONS ── */
+.page-section{display:none}
+.page-section.active{display:block;animation:pageSwitchIn .4s var(--ease) both}
+@keyframes pageSwitchIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+
 .streak-pill{
   display:flex;align-items:center;gap:6px;
   padding:7px 14px;border-radius:20px;
@@ -384,6 +411,101 @@ nav{
 }
 .sel-pill:focus{border-color:var(--a3);box-shadow:0 0 0 3px rgba(124,91,255,.12)}
 
+/* ── CUSTOM DATE PICKER ── */
+.date-field{
+  position:relative;display:inline-flex;align-items:center;
+}
+.date-input{
+  padding:7px 34px 7px 13px;border-radius:20px;
+  border:1.5px solid var(--border);background:var(--input);
+  color:var(--text);font-size:13px;font-family:inherit;
+  cursor:pointer;outline:none;width:128px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.date-input::placeholder{color:var(--muted)}
+.date-input:focus{border-color:var(--a3);box-shadow:0 0 0 3px rgba(124,91,255,.12)}
+.date-input.edit-sel-date{padding:7px 30px 7px 11px;font-size:12px;width:118px}
+.date-field-icon{
+  position:absolute;right:9px;top:50%;transform:translateY(-50%);
+  pointer-events:none;color:var(--muted);display:flex;
+  transition:color .2s;
+}
+.date-field:focus-within .date-field-icon,.date-field.open .date-field-icon{color:var(--a1)}
+.date-clear{
+  position:absolute;right:30px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;border-radius:50%;border:none;
+  background:var(--border);color:var(--text2);font-size:10px;
+  display:none;align-items:center;justify-content:center;cursor:pointer;
+  line-height:1;padding:0;
+}
+.date-field.has-value .date-clear{display:flex}
+.date-clear:hover{background:var(--red);color:#fff}
+
+.date-popover{
+  position:absolute;top:calc(100% + 8px);left:0;z-index:500;
+  width:280px;background:var(--card2);border:1px solid var(--border);
+  border-radius:18px;padding:14px;box-shadow:0 20px 56px rgba(0,0,0,.45);
+  opacity:0;visibility:hidden;transform:translateY(-8px) scale(.97);
+  transition:opacity .2s var(--ease),transform .2s var(--ease),visibility .2s;
+  transform-origin:top left;
+}
+.date-popover.show{opacity:1;visibility:visible;transform:none}
+.date-popover.align-right{left:auto;right:0;transform-origin:top right}
+
+.date-pop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.date-pop-nav{
+  width:28px;height:28px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);display:grid;place-items:center;
+  cursor:pointer;font-size:13px;transition:all .2s var(--ease);flex-shrink:0;
+}
+.date-pop-nav:hover{border-color:var(--a1);color:var(--a1);background:var(--card)}
+.date-pop-title{font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.date-pop-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.date-pop-weekdays span{
+  text-align:center;font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.04em;padding:4px 0;
+}
+.date-pop-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.date-pop-day{
+  aspect-ratio:1;border:none;background:transparent;border-radius:10px;
+  color:var(--text);font-size:12.5px;font-family:inherit;cursor:pointer;
+  display:grid;place-items:center;transition:all .15s var(--ease);
+  position:relative;
+}
+.date-pop-day:hover{background:var(--surface)}
+.date-pop-day.muted{color:var(--muted);opacity:.45}
+.date-pop-day.today{font-weight:800;color:var(--a1)}
+.date-pop-day.today::after{
+  content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:var(--a1);
+}
+.date-pop-day.selected{
+  background:linear-gradient(135deg,var(--a3),var(--a1));color:#fff;
+  font-weight:800;box-shadow:0 4px 14px rgba(124,91,255,.4);
+}
+.date-pop-day.selected.today::after{background:#fff}
+.date-pop-foot{
+  display:flex;justify-content:space-between;gap:8px;margin-top:12px;
+  padding-top:10px;border-top:1px solid var(--border);
+}
+.date-pop-foot button{
+  flex:1;padding:7px;border-radius:12px;font-size:12px;font-weight:700;
+  border:1.5px solid var(--border);background:transparent;color:var(--text2);
+  cursor:pointer;font-family:inherit;transition:all .2s var(--ease);
+}
+.date-pop-foot button:hover{border-color:var(--a3);color:var(--text)}
+.date-pop-foot button.primary{
+  background:linear-gradient(135deg,var(--a3),var(--a1));border-color:transparent;color:#fff;
+}
+.date-pop-foot button.primary:hover{box-shadow:0 4px 14px rgba(124,91,255,.4)}
+
+#datePickerScrim{
+  display:none;position:fixed;inset:0;z-index:499;
+  background:rgba(0,0,0,.5);opacity:0;visibility:hidden;
+  transition:opacity .25s var(--ease),visibility .25s;
+}
+#datePickerScrim.show{opacity:1;visibility:visible}
+
 .add-btn{
   margin-left:auto;padding:9px 22px;border-radius:22px;
   background:linear-gradient(135deg,var(--a3),var(--a1),var(--a2));
@@ -422,15 +544,30 @@ nav{
   box-shadow:0 0 16px rgba(200,75,255,.2);
 }
 
-.sort-wrap{margin-left:auto;display:flex;align-items:center;gap:6px}
-.sort-label{font-size:11px;color:var(--muted);font-weight:600}
-.sort-select{
-  padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;
-  border:1.5px solid var(--border);background:transparent;color:var(--text2);
-  font-family:inherit;cursor:pointer;outline:none;transition:all .2s var(--ease);
+.sort-wrap{
+  margin-left:auto;display:flex;align-items:center;gap:8px;
+  padding:5px 6px 5px 12px;border-radius:22px;
+  background:var(--card2);border:1.5px solid var(--border);
+  transition:border-color .2s,box-shadow .2s;
 }
-.sort-select:hover{border-color:var(--a3);color:var(--text)}
-.sort-select:focus{border-color:var(--a3);box-shadow:0 0 0 3px rgba(124,91,255,.12)}
+.sort-wrap:focus-within{border-color:var(--a3);box-shadow:0 0 0 3px rgba(124,91,255,.15)}
+.sort-label{
+  font-size:11.5px;color:var(--text2);font-weight:700;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.sort-label svg{flex-shrink:0;opacity:.8}
+.sort-select{
+  padding:6px 28px 6px 12px;border-radius:18px;font-size:12.5px;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--text);
+  font-family:inherit;cursor:pointer;outline:none;transition:all .2s var(--ease);
+  appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--a1) 50%),linear-gradient(135deg,var(--a1) 50%,transparent 50%);
+  background-position:calc(100% - 16px) center,calc(100% - 11px) center;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+}
+.sort-select:hover{border-color:var(--a3);box-shadow:0 2px 10px rgba(124,91,255,.18)}
+.sort-select:focus{border-color:var(--a1);box-shadow:0 0 0 3px rgba(124,91,255,.18)}
+.sort-select option{background:var(--surface);color:var(--text)}
 
 /* ── TASK LIST ── */
 .task-list-wrap{
@@ -740,6 +877,28 @@ canvas.full-chart{width:100%!important;display:block}
   .right-col{flex-direction:column}
   .nav-btn{display:none}
   .sort-wrap{margin-left:0;width:100%}
+  nav{flex-wrap:wrap;gap:10px;padding-bottom:10px}
+  .page-tabs{order:3;width:100%}
+  .page-tab{flex:1;justify-content:center}
+
+  /* date picker: full-width input, centered fixed sheet on mobile */
+  .date-input{width:118px;font-size:13px;padding:9px 32px 9px 12px}
+  .date-popover{
+    position:fixed;top:auto;bottom:0;left:0;right:0;
+    width:auto;max-width:none;border-radius:22px 22px 0 0;
+    padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+    transform:translateY(100%);box-shadow:0 -16px 48px rgba(0,0,0,.5);
+  }
+  .date-popover.show{transform:translateY(0)}
+  .date-popover::before{
+    content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
+    width:36px;height:4px;border-radius:99px;background:var(--border);
+  }
+  .date-pop-head{margin-top:10px}
+  .date-pop-nav{width:34px;height:34px;font-size:15px}
+  .date-pop-day{font-size:14px;min-height:38px}
+  .date-pop-foot button{padding:11px;font-size:13px}
+  #datePickerScrim{display:block}
 }
 
 /* ══════════════════════════════════════
@@ -1080,6 +1239,7 @@ canvas.full-chart{width:100%!important;display:block}
 <canvas id="confettiCanvas"></canvas>
 <div id="cursor-glow"></div>
 <div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg">Done!</span></div>
+<div id="datePickerScrim" onclick="closeAllDatePickers()"></div>
 
 <!-- AUTH OVERLAY -->
 <div id="authOverlay">
@@ -1152,6 +1312,10 @@ canvas.full-chart{width:100%!important;display:block}
     </div>
     <div class="logo-text"><h1>Tasklight</h1><p>Track work. See progress.</p></div>
   </div>
+  <div class="page-tabs" id="pageTabs">
+    <button class="page-tab active" id="navTasks" onclick="showPage('tasks')">✓ Tasks</button>
+    <button class="page-tab" id="navAnalytics" onclick="showPage('analytics')">📊 Analytics</button>
+  </div>
   <div class="nav-right">
     <div class="streak-pill">🔥 <span class="s-num" id="streakNum">0</span> day streak</div>
     <button class="nav-btn" id="notifyBtn" onclick="requestNotifyPermission()" title="Get browser reminders for due tasks">🔔 Reminders</button>
@@ -1165,53 +1329,43 @@ canvas.full-chart{width:100%!important;display:block}
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="eyebrow"><span class="eyebrow-dot"></span>Your day at a glance</div>
-  <h2>
-    <span class="line1">Get things done —</span>
-    <span class="line2">and <span class="grad1">see how</span></span>
-    <span class="line3"><span class="grad2">it's going</span>.</span>
-  </h2>
-  <p>Capture tasks, set priorities and due dates, and watch trends emerge. Your data stays on this device.</p>
-</section>
+<!-- ════════ TASKS PAGE ════════ -->
+<div class="page-section active" id="pageTasks">
 
-<!-- STATS -->
-<div class="stats-row">
-  <div class="stat-card"><div class="shimmer"></div>
-    <div class="stat-label">Total <span class="stat-icon">☰</span></div>
-    <div class="stat-value" id="statTotal">0</div>
-  </div>
-  <div class="stat-card"><div class="shimmer"></div>
-    <div class="stat-label">Active <span class="stat-icon">◎</span></div>
-    <div class="stat-value" id="statActive">0</div>
-  </div>
-  <div class="stat-card"><div class="shimmer"></div>
-    <div class="stat-label">Overdue <span class="stat-icon">⚡</span></div>
-    <div class="stat-value" id="statOverdue">0</div>
-  </div>
-  <div class="stat-card"><div class="shimmer"></div>
-    <div class="stat-label">Completion <span class="stat-icon">↗</span></div>
-    <div class="stat-value" id="statCompletion">0%</div>
-    <div class="stat-bar-wrap"><div class="stat-bar" id="statBar" style="width:0%"></div></div>
-  </div>
-</div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>Your day at a glance</div>
+    <h2>
+      <span class="line1">Get things done —</span>
+      <span class="line2">and <span class="grad1">see how</span></span>
+      <span class="line3"><span class="grad2">it's going</span>.</span>
+    </h2>
+    <p>Capture tasks, set priorities and due dates, and watch trends emerge. Your data stays on this device.</p>
+  </section>
 
-<!-- MAIN -->
-<div class="main-wrap">
-
-  <!-- WEEKLY SUMMARY -->
-  <div class="panel summary-card" id="summaryCard">
-    <div class="summary-top">
-      <div class="summary-icon">📈</div>
-      <div class="summary-text" id="summaryText">Complete a few tasks to see your weekly summary here.</div>
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="shimmer"></div>
+      <div class="stat-label">Total <span class="stat-icon">☰</span></div>
+      <div class="stat-value" id="statTotal">0</div>
     </div>
-    <div class="summary-bottom" id="summaryBottom"></div>
+    <div class="stat-card"><div class="shimmer"></div>
+      <div class="stat-label">Active <span class="stat-icon">◎</span></div>
+      <div class="stat-value" id="statActive">0</div>
+    </div>
+    <div class="stat-card"><div class="shimmer"></div>
+      <div class="stat-label">Overdue <span class="stat-icon">⚡</span></div>
+      <div class="stat-value" id="statOverdue">0</div>
+    </div>
+    <div class="stat-card"><div class="shimmer"></div>
+      <div class="stat-label">Completion <span class="stat-icon">↗</span></div>
+      <div class="stat-value" id="statCompletion">0%</div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="statBar" style="width:0%"></div></div>
+    </div>
   </div>
 
-  <div class="top-grid">
-
-    <!-- TASKS -->
+  <!-- MAIN -->
+  <div class="main-wrap">
     <div class="panel">
       <div class="panel-header"><h3>Your tasks</h3><p>Add, prioritize, and check off your work.</p></div>
       <div class="add-form">
@@ -1223,7 +1377,13 @@ canvas.full-chart{width:100%!important;display:block}
             <option value="Medium" selected>🟣 Medium</option>
             <option value="Low">🟢 Low</option>
           </select>
-          <input class="sel-pill" id="taskDue" type="date" style="padding:6px 12px">
+          <div class="date-field" id="dateField_taskDue">
+            <input class="date-input" id="taskDue" type="text" placeholder="dd/mm/yyyy" readonly autocomplete="off">
+            <button type="button" class="date-clear" onclick="event.stopPropagation();clearDatePicker('taskDue')" title="Clear date">✕</button>
+            <span class="date-field-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+            </span>
+          </div>
           <input class="sel-pill" id="taskCat" type="text" placeholder="Category" style="min-width:100px">
           <select class="sel-pill" id="taskRecur" title="Repeat">
             <option value="">No repeat</option>
@@ -1239,7 +1399,10 @@ canvas.full-chart{width:100%!important;display:block}
         <button class="filter-tab" onclick="setFilter('done',this)">Done</button>
         <button class="filter-tab" onclick="setFilter('overdue',this)">Overdue</button>
         <div class="sort-wrap">
-          <span class="sort-label">Sort</span>
+          <span class="sort-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+            Sort
+          </span>
           <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
             <option value="manual">Manual order</option>
             <option value="due">Due date</option>
@@ -1252,18 +1415,66 @@ canvas.full-chart{width:100%!important;display:block}
         <div class="task-list" id="taskList"></div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- RIGHT -->
-    <div class="right-col">
-      <div class="panel">
-        <div class="panel-header"><h3>Priority mix</h3><p>How your workload breaks down.</p></div>
-        <div class="chart-center"><canvas id="donut" width="160" height="160"></canvas></div>
-        <div class="legend" id="donutLegend"></div>
+<!-- ════════ ANALYTICS PAGE ════════ -->
+<div class="page-section" id="pageAnalytics">
+
+  <section class="hero" style="padding-bottom:20px">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>Trends &amp; breakdowns</div>
+    <h2>
+      <span class="line1">Your progress —</span>
+      <span class="line2"><span class="grad1">visualized</span>.</span>
+    </h2>
+    <p>See how your workload breaks down and how your habits are trending over time.</p>
+  </section>
+
+  <div class="main-wrap">
+
+    <!-- WEEKLY SUMMARY -->
+    <div class="panel summary-card" id="summaryCard">
+      <div class="summary-top">
+        <div class="summary-icon">📈</div>
+        <div class="summary-text" id="summaryText">Complete a few tasks to see your weekly summary here.</div>
       </div>
+      <div class="summary-bottom" id="summaryBottom"></div>
+    </div>
+
+    <div class="top-grid">
       <div class="panel">
-        <div class="panel-header"><h3>Categories</h3><p>Where your tasks are concentrated.</p></div>
-        <div class="chart-center"><canvas id="catDonut" width="160" height="160"></canvas></div>
-        <div class="legend" id="catDonutLegend"></div>
+        <div class="panel-header"><h3>Completion trend</h3><p>Completed vs. created over the last 7 days.</p></div>
+        <div class="chart-canvas-wrap"><canvas id="trendChart" class="full-chart" height="220"></canvas></div>
+        <div class="chart-legend-row">
+          <div class="cl-item"><div class="cl-dot" style="background:#ff4bb8"></div>Completed</div>
+          <div class="cl-item"><div class="cl-dot" style="background:#7c5bff"></div>Created</div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right-col">
+        <div class="panel">
+          <div class="panel-header"><h3>Priority mix</h3><p>How your workload breaks down.</p></div>
+          <div class="chart-center"><canvas id="donut" width="160" height="160"></canvas></div>
+          <div class="legend" id="donutLegend"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h3>Categories</h3><p>Where your tasks are concentrated.</p></div>
+          <div class="chart-center"><canvas id="catDonut" width="160" height="160"></canvas></div>
+          <div class="legend" id="catDonutLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-grid">
+      <div class="panel">
+        <div class="panel-header"><h3>Progress by priority</h3><p>Completed vs. remaining for each tier.</p></div>
+        <div class="chart-canvas-wrap"><canvas id="barChart" class="full-chart" height="180"></canvas></div>
+        <div class="chart-legend-row">
+          <div class="cl-item"><div class="cl-dot" style="background:#ff4bb8"></div>Done</div>
+          <div class="cl-item"><div class="cl-dot" style="background:rgba(124,91,255,.4)"></div>Remaining</div>
+        </div>
       </div>
       <div class="panel">
         <div class="panel-header"><h3>Activity</h3><p>Tasks completed in the last 4 weeks.</p></div>
@@ -1272,26 +1483,6 @@ canvas.full-chart{width:100%!important;display:block}
           <div class="week-label">T</div><div class="week-label">F</div><div class="week-label">S</div><div class="week-label">S</div>
         </div>
         <div class="streak-grid" id="activityGrid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHARTS -->
-  <div class="charts-grid">
-    <div class="panel">
-      <div class="panel-header"><h3>Completion trend</h3><p>Completed vs. created over the last 7 days.</p></div>
-      <div class="chart-canvas-wrap"><canvas id="trendChart" class="full-chart" height="180"></canvas></div>
-      <div class="chart-legend-row">
-        <div class="cl-item"><div class="cl-dot" style="background:#ff4bb8"></div>Completed</div>
-        <div class="cl-item"><div class="cl-dot" style="background:#7c5bff"></div>Created</div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header"><h3>Progress by priority</h3><p>Completed vs. remaining for each tier.</p></div>
-      <div class="chart-canvas-wrap"><canvas id="barChart" class="full-chart" height="180"></canvas></div>
-      <div class="chart-legend-row">
-        <div class="cl-item"><div class="cl-dot" style="background:#ff4bb8"></div>Done</div>
-        <div class="cl-item"><div class="cl-dot" style="background:rgba(124,91,255,.4)"></div>Remaining</div>
       </div>
     </div>
   </div>
@@ -1613,9 +1804,25 @@ let allTasks=[];
 let currentFilter='all';
 let currentSort='manual';
 let editingId=null;
+let currentPage='tasks';
 const TODAY=new Date().toISOString().split('T')[0];
 function save(){
   if(currentUser) localStorage.setItem(`tl_tasks_${currentUser}`,JSON.stringify(allTasks));
+}
+
+/* ════════════════════════════════
+   PAGE NAVIGATION
+════════════════════════════════ */
+function showPage(page){
+  currentPage=page;
+  document.getElementById('pageTasks').classList.toggle('active', page==='tasks');
+  document.getElementById('pageAnalytics').classList.toggle('active', page==='analytics');
+  document.getElementById('navTasks').classList.toggle('active', page==='tasks');
+  document.getElementById('navAnalytics').classList.toggle('active', page==='analytics');
+  if(page==='analytics'){
+    // canvases were hidden (display:none) so their measured size was 0 — redraw now that they're visible
+    requestAnimationFrame(()=>{ drawAllCharts(); renderActivity(); });
+  }
 }
 
 /* ════════════════════════════════
@@ -1683,6 +1890,169 @@ function updateStats(s){
 }
 
 /* ════════════════════════════════
+   CUSTOM DATE PICKER (dd/mm/yyyy display, ISO storage)
+════════════════════════════════ */
+const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WEEKDAY_LETTERS=['M','T','W','T','F','S','S'];
+let openDatePicker=null; // {inputId, popoverEl, viewYear, viewMonth}
+
+function formatDdMmYyyy(iso){
+  if(!iso) return '';
+  const [y,m,d]=iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function isoFromInput(inputId){
+  const el=document.getElementById(inputId);
+  return el ? (el.dataset.iso||'') : '';
+}
+function setDateInputValue(inputId,iso){
+  const el=document.getElementById(inputId);
+  if(!el) return;
+  el.dataset.iso=iso||'';
+  el.value=iso?formatDdMmYyyy(iso):'';
+  const wrap=document.getElementById('dateField_'+inputId);
+  if(wrap) wrap.classList.toggle('has-value',!!iso);
+}
+function clearDatePicker(inputId){
+  setDateInputValue(inputId,'');
+  closeAllDatePickers();
+}
+
+function buildDatePopover(inputId){
+  const pop=document.createElement('div');
+  pop.className='date-popover';
+  pop.id='datePop_'+inputId;
+  pop.innerHTML=`
+    <div class="date-pop-head">
+      <button type="button" class="date-pop-nav" data-act="prev">‹</button>
+      <span class="date-pop-title" data-role="title"></span>
+      <button type="button" class="date-pop-nav" data-act="next">›</button>
+    </div>
+    <div class="date-pop-weekdays">${WEEKDAY_LETTERS.map(w=>`<span>${w}</span>`).join('')}</div>
+    <div class="date-pop-grid" data-role="grid"></div>
+    <div class="date-pop-foot">
+      <button type="button" data-act="today">Today</button>
+      <button type="button" data-act="clear">Clear</button>
+      <button type="button" class="primary" data-act="done">Done</button>
+    </div>`;
+  pop.addEventListener('click',e=>e.stopPropagation());
+  pop.querySelector('[data-act="prev"]').onclick=()=>shiftDatePopoverMonth(inputId,-1);
+  pop.querySelector('[data-act="next"]').onclick=()=>shiftDatePopoverMonth(inputId,1);
+  pop.querySelector('[data-act="today"]').onclick=()=>{
+    const t=new Date();
+    setDateInputValue(inputId,t.toISOString().split('T')[0]);
+    openDatePicker.viewYear=t.getFullYear();
+    openDatePicker.viewMonth=t.getMonth();
+    renderDatePopoverGrid(inputId);
+  };
+  pop.querySelector('[data-act="clear"]').onclick=()=>clearDatePicker(inputId);
+  pop.querySelector('[data-act="done"]').onclick=()=>closeAllDatePickers();
+  return pop;
+}
+
+function renderDatePopoverGrid(inputId){
+  if(!openDatePicker||openDatePicker.inputId!==inputId) return;
+  const {popoverEl,viewYear,viewMonth}=openDatePicker;
+  popoverEl.querySelector('[data-role="title"]').textContent=`${MONTH_NAMES[viewMonth]} ${viewYear}`;
+
+  const grid=popoverEl.querySelector('[data-role="grid"]');
+  const selectedIso=isoFromInput(inputId);
+  const todayIso=new Date().toISOString().split('T')[0];
+
+  const firstOfMonth=new Date(viewYear,viewMonth,1);
+  let startOffset=firstOfMonth.getDay()-1; // Monday-first
+  if(startOffset<0) startOffset=6;
+  const daysInMonth=new Date(viewYear,viewMonth+1,0).getDate();
+  const daysInPrevMonth=new Date(viewYear,viewMonth,0).getDate();
+
+  let cells=[];
+  for(let i=startOffset;i>0;i--) cells.push({day:daysInPrevMonth-i+1,muted:true,y:viewYear,m:viewMonth-1});
+  for(let d=1;d<=daysInMonth;d++) cells.push({day:d,muted:false,y:viewYear,m:viewMonth});
+  while(cells.length%7!==0||cells.length<42) cells.push({day:cells.length-startOffset-daysInMonth+1,muted:true,y:viewYear,m:viewMonth+1});
+
+  grid.innerHTML=cells.map(c=>{
+    const norm=new Date(c.y,c.m,c.day);
+    const iso=norm.toISOString().split('T')[0];
+    const isToday=iso===todayIso;
+    const isSelected=iso===selectedIso;
+    return `<button type="button" class="date-pop-day${c.muted?' muted':''}${isToday?' today':''}${isSelected?' selected':''}" data-iso="${iso}">${c.day}</button>`;
+  }).join('');
+
+  grid.querySelectorAll('.date-pop-day').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const iso=btn.dataset.iso;
+      setDateInputValue(inputId,iso);
+      const d=new Date(iso+'T00:00:00');
+      openDatePicker.viewYear=d.getFullYear();
+      openDatePicker.viewMonth=d.getMonth();
+      renderDatePopoverGrid(inputId);
+      // small delay so the selection highlight is visible before closing
+      setTimeout(closeAllDatePickers,180);
+    });
+  });
+}
+
+function shiftDatePopoverMonth(inputId,delta){
+  if(!openDatePicker||openDatePicker.inputId!==inputId) return;
+  openDatePicker.viewMonth+=delta;
+  if(openDatePicker.viewMonth<0){openDatePicker.viewMonth=11;openDatePicker.viewYear--;}
+  if(openDatePicker.viewMonth>11){openDatePicker.viewMonth=0;openDatePicker.viewYear++;}
+  renderDatePopoverGrid(inputId);
+}
+
+function openDatePickerFor(inputId){
+  closeAllDatePickers();
+  const wrap=document.getElementById('dateField_'+inputId);
+  const input=document.getElementById(inputId);
+  if(!wrap||!input) return;
+
+  const pop=buildDatePopover(inputId);
+  wrap.appendChild(pop);
+  wrap.classList.add('open');
+
+  const iso=isoFromInput(inputId);
+  const base=iso?new Date(iso+'T00:00:00'):new Date();
+  openDatePicker={inputId,popoverEl:pop,viewYear:base.getFullYear(),viewMonth:base.getMonth()};
+  renderDatePopoverGrid(inputId);
+
+  // flip to align right if it would overflow the viewport (desktop only)
+  requestAnimationFrame(()=>{
+    if(window.innerWidth>720){
+      const r=pop.getBoundingClientRect();
+      if(r.right>window.innerWidth-12) pop.classList.add('align-right');
+    }
+    pop.classList.add('show');
+  });
+  document.getElementById('datePickerScrim').classList.add('show');
+}
+
+function closeAllDatePickers(){
+  if(openDatePicker){
+    const {popoverEl,inputId}=openDatePicker;
+    popoverEl.classList.remove('show');
+    const wrap=document.getElementById('dateField_'+inputId);
+    if(wrap) wrap.classList.remove('open');
+    setTimeout(()=>popoverEl.remove(),200);
+    openDatePicker=null;
+  }
+  document.getElementById('datePickerScrim').classList.remove('show');
+}
+
+// Delegate clicks: opening a date field, and closing pickers when clicking elsewhere
+document.addEventListener('click',e=>{
+  const field=e.target.closest('.date-field');
+  if(field && e.target.closest('.date-input')){
+    const input=field.querySelector('.date-input');
+    if(input) openDatePickerFor(input.id);
+    return;
+  }
+  if(!e.target.closest('.date-popover')) closeAllDatePickers();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeAllDatePickers();
+});
+
+/* ════════════════════════════════
    CRUD
 ════════════════════════════════ */
 function addTask(){
@@ -1698,14 +2068,15 @@ function addTask(){
     id:crypto.randomUUID(),title,
     notes:document.getElementById('taskNotes').value.trim(),
     priority:document.getElementById('taskPriority').value,
-    due_date:document.getElementById('taskDue').value,
+    due_date:isoFromInput('taskDue'),
     category:document.getElementById('taskCat').value.trim(),
     recurrence:document.getElementById('taskRecur').value||'',
     done:false,created_at:new Date().toISOString(),
     order:allTasks.length
   });
   save(); refresh();
-  ['taskTitle','taskNotes','taskDue','taskCat'].forEach(id=>document.getElementById(id).value='');
+  ['taskTitle','taskNotes','taskCat'].forEach(id=>document.getElementById(id).value='');
+  setDateInputValue('taskDue','');
   document.getElementById('taskPriority').value='Medium';
   document.getElementById('taskRecur').value='';
   showToast('Task added!','✨');
@@ -1830,7 +2201,7 @@ function saveEdit(id){
   t.title=title;
   t.notes=document.getElementById('editNotes_'+id).value.trim();
   t.priority=document.getElementById('editPriority_'+id).value;
-  t.due_date=document.getElementById('editDue_'+id).value;
+  t.due_date=isoFromInput('editDue_'+id);
   t.category=document.getElementById('editCat_'+id).value.trim();
   t.recurrence=document.getElementById('editRecur_'+id).checked
     ? (document.getElementById('editRecurFreq_'+id).value||'weekly')
@@ -1919,7 +2290,13 @@ function renderTasks(){
               <option value="Medium" ${t.priority==='Medium'?'selected':''}>🟣 Medium</option>
               <option value="Low" ${t.priority==='Low'?'selected':''}>🟢 Low</option>
             </select>
-            <input class="edit-sel" id="editDue_${t.id}" type="date" value="${t.due_date||''}">
+            <div class="date-field${t.due_date?' has-value':''}" id="dateField_editDue_${t.id}">
+              <input class="date-input edit-sel-date" id="editDue_${t.id}" type="text" placeholder="dd/mm/yyyy" value="${t.due_date?formatDdMmYyyy(t.due_date):''}" data-iso="${t.due_date||''}" readonly autocomplete="off">
+              <button type="button" class="date-clear" onclick="event.stopPropagation();clearDatePicker('editDue_${t.id}')" title="Clear date">✕</button>
+              <span class="date-field-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+              </span>
+            </div>
             <input class="edit-sel" id="editCat_${t.id}" type="text" placeholder="Category" value="${esc(t.category||'')}" style="min-width:100px">
           </div>
           <div class="edit-row">
@@ -2458,6 +2835,7 @@ document.getElementById('taskTitle').addEventListener('keydown',e=>{
 
 
 window.addEventListener('resize',()=>{
+  if(currentPage!=='analytics') return;
   setTimeout(()=>{drawTrend();drawBar()},100);
 });
 
