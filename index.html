@@ -41,26 +41,81 @@ body{
   font-family:'Inter',sans-serif;
   background:var(--bg); color:var(--text);
   min-height:100vh; overflow-x:hidden;
-  transition:background .4s,color .4s;
+  transition:background .5s,color .5s;
 }
+
+/* page-load fade in */
+body{animation:pageIn .6s var(--ease) both}
+@keyframes pageIn{from{opacity:0}to{opacity:1}}
+
 .orb-wrap{
   position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
 }
 .orb{
-  position:absolute;border-radius:50%;filter:blur(80px);
-  animation:orbFloat 18s ease-in-out infinite;
+  position:absolute;border-radius:50%;filter:blur(90px);
+  will-change:transform;
 }
-.orb1{width:600px;height:600px;top:-200px;left:-150px;background:var(--orb1);animation-delay:0s}
-.orb2{width:500px;height:500px;top:40%;right:-150px;background:var(--orb2);animation-delay:-6s}
-.orb3{width:400px;height:400px;bottom:-100px;left:30%;background:var(--orb3);animation-delay:-12s}
-@keyframes orbFloat{
-  0%,100%{transform:translate(0,0) scale(1)}
-  33%{transform:translate(40px,-60px) scale(1.08)}
-  66%{transform:translate(-30px,40px) scale(.95)}
+.orb1{
+  width:900px;height:900px;top:-300px;left:-220px;background:var(--orb1);
+  animation:orbA 22s ease-in-out infinite;
+}
+.orb2{
+  width:700px;height:700px;top:25%;right:-200px;background:var(--orb2);
+  animation:orbB 17s ease-in-out infinite;
+}
+.orb3{
+  width:550px;height:550px;bottom:-140px;left:22%;background:var(--orb3);
+  animation:orbC 25s ease-in-out infinite;
+}
+.orb4{
+  width:400px;height:400px;top:50%;left:3%;background:rgba(255,75,110,.07);
+  animation:orbD 13s ease-in-out infinite;
+}
+/* extra micro-orb for depth */
+.orb5{
+  width:200px;height:200px;top:20%;left:45%;background:rgba(75,255,184,.05);
+  animation:orbD 9s ease-in-out infinite reverse;filter:blur(50px);
+}
+@keyframes orbA{
+  0%  {transform:translate(0,0) scale(1) rotate(0deg)}
+  25% {transform:translate(70px,-100px) scale(1.14) rotate(5deg)}
+  55% {transform:translate(-40px,80px) scale(.88) rotate(-3deg)}
+  80% {transform:translate(30px,20px) scale(1.05) rotate(2deg)}
+  100%{transform:translate(0,0) scale(1) rotate(0deg)}
+}
+@keyframes orbB{
+  0%  {transform:translate(0,0) scale(1)}
+  35% {transform:translate(-90px,60px) scale(1.1)}
+  65% {transform:translate(50px,-40px) scale(.93)}
+  100%{transform:translate(0,0) scale(1)}
+}
+@keyframes orbC{
+  0%  {transform:translate(0,0) scale(1)}
+  40% {transform:translate(60px,-50px) scale(1.12)}
+  70% {transform:translate(-50px,90px) scale(.9)}
+  100%{transform:translate(0,0) scale(1)}
+}
+@keyframes orbD{
+  0%  {transform:translate(0,0) scale(1)}
+  50% {transform:translate(90px,-70px) scale(1.25)}
+  100%{transform:translate(0,0) scale(1)}
 }
 
 /* ── CANVAS PARTICLES ── */
-#particleCanvas{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.5}
+#particleCanvas{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.65}
+
+/* ── MAGNETIC CURSOR ── */
+#cursor-glow{
+  position:fixed;width:320px;height:320px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,91,255,.08) 0%,transparent 70%);
+  pointer-events:none;z-index:1;
+  transform:translate(-50%,-50%);
+  transition:transform .08s linear, opacity .3s;
+  mix-blend-mode:screen;
+}
+
+/* ── 3D TILT on cards ── */
+.stat-card,.panel{transform-style:preserve-3d;will-change:transform}
 
 /* everything above particles */
 nav,main,.hero,.stats-row,.main-wrap{position:relative;z-index:2}
@@ -74,6 +129,11 @@ nav{
   background:var(--nav);
   backdrop-filter:blur(24px) saturate(180%);
   transition:background .4s,border-color .4s;
+  animation:navSlideDown .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes navSlideDown{
+  from{transform:translateY(-100%);opacity:0}
+  to{transform:none;opacity:1}
 }
 .logo{display:flex;align-items:center;gap:13px;cursor:default}
 .logo-icon{
@@ -82,12 +142,14 @@ nav{
   display:grid;place-items:center;
   box-shadow:0 0 0 1px rgba(124,91,255,.3),0 8px 24px rgba(124,91,255,.4);
   animation:logoPulse 3s ease-in-out infinite;
-  transition:transform .3s;flex-shrink:0;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;
 }
-.logo-icon:hover{transform:rotate(15deg) scale(1.1)}
+.logo-icon:hover{transform:rotate(20deg) scale(1.15)}
+.logo-icon svg{transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.logo-icon:hover svg{transform:rotate(-20deg)}
 @keyframes logoPulse{
   0%,100%{box-shadow:0 0 0 1px rgba(124,91,255,.3),0 8px 24px rgba(124,91,255,.4)}
-  50%{box-shadow:0 0 0 4px rgba(124,91,255,.15),0 8px 32px rgba(200,75,255,.5)}
+  50%{box-shadow:0 0 0 5px rgba(124,91,255,.12),0 8px 36px rgba(200,75,255,.6)}
 }
 .logo-text h1{font-size:17px;font-weight:900;letter-spacing:-.03em}
 .logo-text p{font-size:11px;color:var(--muted);margin-top:1px}
@@ -141,36 +203,61 @@ nav{
   text-transform:uppercase;color:var(--muted);
   border:1px solid var(--border);padding:5px 14px;border-radius:20px;
   margin-bottom:22px;background:var(--surface);
-  animation:fadeSlideDown .6s var(--ease) both;
+  animation:eyebrowIn .7s cubic-bezier(.34,1.56,.64,1) both;
   transition:border-color .3s,box-shadow .3s;
 }
-.eyebrow:hover{border-color:var(--a3);box-shadow:0 0 20px rgba(124,91,255,.2)}
-.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--a3);animation:dotPulse 2s ease-in-out infinite}
-@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+@keyframes eyebrowIn{
+  from{opacity:0;transform:translateY(10px) scale(.9)}
+  to{opacity:1;transform:none;scale:1}
+}
+.eyebrow:hover{border-color:var(--a3);box-shadow:0 0 24px rgba(124,91,255,.3)}
+.eyebrow-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--a3);
+  animation:dotPulse 2s ease-in-out infinite;
+  box-shadow:0 0 6px var(--a3);
+}
+@keyframes dotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.5}}
 
 .hero h2{
   font-size:clamp(30px,4.5vw,58px);
   font-weight:900;line-height:1.06;letter-spacing:-.04em;margin-bottom:16px;
-  animation:fadeSlideDown .6s var(--ease) .1s both;
 }
+/* Each line of the hero h2 animates in separately */
+.hero h2 .line1{
+  display:block;
+  animation:lineIn .7s cubic-bezier(.34,1.56,.64,1) .05s both;
+}
+.hero h2 .line2{
+  display:block;
+  animation:lineIn .7s cubic-bezier(.34,1.56,.64,1) .15s both;
+}
+.hero h2 .line3{
+  display:block;
+  animation:lineIn .7s cubic-bezier(.34,1.56,.64,1) .25s both;
+}
+@keyframes lineIn{
+  from{opacity:0;transform:translateX(-24px) skewX(-4deg)}
+  to{opacity:1;transform:none}
+}
+
 .grad1{
-  background:linear-gradient(90deg,var(--a1),var(--a3),var(--a2));
-  background-size:200%;
+  background:linear-gradient(90deg,var(--a1),var(--a3),var(--a2),var(--a1));
+  background-size:300%;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:gradShift 4s ease-in-out infinite;
+  animation:gradShift 5s ease-in-out infinite;
 }
 .grad2{
-  background:linear-gradient(90deg,var(--a2),var(--a1),var(--a3));
-  background-size:200%;
+  background:linear-gradient(90deg,var(--a2),var(--a1),var(--a3),var(--a2));
+  background-size:300%;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:gradShift 4s ease-in-out infinite reverse;
+  animation:gradShift 5s ease-in-out infinite reverse;
 }
-@keyframes gradShift{0%,100%{background-position:0%}50%{background-position:100%}}
+@keyframes gradShift{0%{background-position:0%}50%{background-position:100%}100%{background-position:0%}}
 
-.hero p{color:var(--muted);font-size:15px;line-height:1.7;max-width:520px;
-  animation:fadeSlideDown .6s var(--ease) .2s both}
-
-@keyframes fadeSlideDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+.hero p{
+  color:var(--muted);font-size:15px;line-height:1.7;max-width:520px;
+  animation:lineIn .7s cubic-bezier(.34,1.56,.64,1) .35s both;
+}
 
 /* ── STATS ── */
 .stats-row{
@@ -181,26 +268,34 @@ nav{
   background:var(--card);border-radius:20px;
   border:1px solid var(--border);padding:22px 22px 18px;
   position:relative;overflow:hidden;cursor:default;
-  transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;
-  animation:cardIn .5s var(--ease) both;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s;
+  animation:cardIn .6s cubic-bezier(.34,1.56,.64,1) both;
 }
-.stat-card:nth-child(1){animation-delay:.05s}
-.stat-card:nth-child(2){animation-delay:.1s}
-.stat-card:nth-child(3){animation-delay:.15s}
-.stat-card:nth-child(4){animation-delay:.2s}
-@keyframes cardIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-
+.stat-card:nth-child(1){animation-delay:.08s}
+.stat-card:nth-child(2){animation-delay:.16s}
+.stat-card:nth-child(3){animation-delay:.24s}
+.stat-card:nth-child(4){animation-delay:.32s}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(32px) scale(.94)}
+  to{opacity:1;transform:none}
+}
+/* rotating conic gradient border on hover */
 .stat-card::after{
-  content:'';position:absolute;inset:-1px;border-radius:inherit;
-  background:linear-gradient(135deg,var(--a3),var(--a1),var(--a2));
-  opacity:0;transition:opacity .3s;z-index:-1;
+  content:'';position:absolute;inset:-2px;border-radius:22px;
+  background:conic-gradient(from var(--angle,0deg),var(--a3),var(--a1),var(--a2),var(--a3));
+  opacity:0;transition:opacity .4s;z-index:-1;
+  animation:rotateBorder 3s linear infinite;
 }
+@property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+@keyframes rotateBorder{to{--angle:360deg}}
 .stat-card::before{
-  content:'';position:absolute;inset:0;border-radius:inherit;
+  content:'';position:absolute;inset:1px;border-radius:19px;
   background:var(--card);z-index:-1;
-  transition:background .3s;
 }
-.stat-card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 20px 60px rgba(124,91,255,.25)}
+.stat-card:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 24px 64px rgba(124,91,255,.3),0 0 0 1px rgba(124,91,255,.1);
+}
 .stat-card:hover::after{opacity:1}
 
 /* shimmer sweep */
@@ -377,66 +472,72 @@ nav{
   padding:13px 14px 14px; /* extra bottom padding so tags never get clipped */
   border-radius:14px;
   background:var(--surface);border:1.5px solid var(--border2);
-  transition:all .25s var(--ease);
-  animation:taskSlide .3s var(--ease) both;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s,background .3s,opacity .4s,filter .4s;
+  animation:taskSlide .5s cubic-bezier(.34,1.56,.64,1) both;
   position:relative;
-  /* removed overflow:hidden — was clipping tag badges */
   cursor:default;
-  flex-shrink:0; /* prevent items from squishing inside flex container */
+  flex-shrink:0;
 }
 @keyframes taskSlide{
-  from{opacity:0;transform:translateX(-12px)}
+  from{opacity:0;transform:translateX(-22px) scale(.96)}
+  65%{transform:translateX(5px) scale(1.008)}
   to{opacity:1;transform:none}
 }
 .task-item::after{
-  content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;
+  content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;
   border-radius:3px;
-  background:linear-gradient(180deg,var(--a3),var(--a1));
+  background:linear-gradient(180deg,var(--a3),var(--a1),var(--a2));
   transform:scaleY(0);transform-origin:bottom;
-  transition:transform .25s var(--ease);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
 }
 .task-item:hover::after{transform:scaleY(1)}
 .task-item:hover{
   border-color:var(--a3);
   background:var(--card2);
-  transform:translateX(4px);
-  box-shadow:0 4px 20px rgba(124,91,255,.15);
+  transform:translateX(7px);
+  box-shadow:-3px 0 0 var(--a3),0 8px 32px rgba(124,91,255,.2);
 }
-.task-item.done{opacity:.4}
+.task-item.done{opacity:.35;filter:saturate(.35)}
 .task-item.done .task-title{text-decoration:line-through;color:var(--muted)}
 .task-item.removing{
-  animation:taskRemove .3s var(--ease) forwards;
+  animation:taskRemove .45s cubic-bezier(.4,0,1,1) forwards;
 }
 @keyframes taskRemove{
-  to{opacity:0;transform:translateX(20px) scale(.95);max-height:0;padding:0;margin:0}
+  0%{opacity:1;transform:none}
+  50%{opacity:0;transform:translateX(28px) scale(.95)}
+  100%{opacity:0;transform:translateX(28px) scale(.9);max-height:0;padding:0;margin:0;border-width:0}
 }
 
 .task-check{
-  width:21px;height:21px;border-radius:50%;flex-shrink:0;margin-top:1px;
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;margin-top:1px;
   border:2px solid var(--border);background:transparent;cursor:pointer;
-  transition:all .25s var(--ease);display:grid;place-items:center;
+  transition:border-color .25s,transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
+  display:grid;place-items:center;
   position:relative;
 }
 .task-check::before{
-  content:'';position:absolute;inset:-4px;border-radius:50%;
-  background:radial-gradient(circle,rgba(200,75,255,.25),transparent 70%);
-  opacity:0;transition:opacity .2s;
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,75,255,.3),transparent 70%);
+  opacity:0;transition:opacity .25s;transform:scale(.6);
+  transition:opacity .25s,transform .25s;
 }
-.task-check:hover::before{opacity:1}
-.task-check:hover{border-color:var(--a1);transform:scale(1.15)}
+.task-check:hover::before{opacity:1;transform:scale(1)}
+.task-check:hover{border-color:var(--a1);transform:scale(1.2)}
 .task-check.checked{
-  background:linear-gradient(135deg,var(--a3),var(--a1));
+  background:linear-gradient(135deg,var(--a3),var(--a1),var(--a2));
   border-color:transparent;
-  box-shadow:0 0 14px rgba(200,75,255,.5);
-  animation:checkPop .35s var(--ease);
+  box-shadow:0 0 0 0 rgba(200,75,255,.5);
+  animation:checkBurst .5s cubic-bezier(.34,1.56,.64,1) forwards;
 }
-@keyframes checkPop{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.4)}
-  100%{transform:scale(1)}
+@keyframes checkBurst{
+  0%  {transform:scale(1);box-shadow:0 0 0 0 rgba(200,75,255,.6)}
+  35% {transform:scale(1.5);box-shadow:0 0 0 8px rgba(200,75,255,.2)}
+  60% {transform:scale(.9);box-shadow:0 0 0 14px rgba(200,75,255,.05)}
+  100%{transform:scale(1);box-shadow:0 0 18px rgba(200,75,255,.4)}
 }
-.check-mark{color:#fff;font-size:10px;display:none;font-weight:900}
-.task-check.checked .check-mark{display:block}
+.check-mark{color:#fff;font-size:11px;display:none;font-weight:900}
+.task-check.checked .check-mark{display:block;animation:checkMarkIn .3s cubic-bezier(.34,1.56,.64,1) .1s both}
+@keyframes checkMarkIn{from{opacity:0;transform:scale(0) rotate(-20deg)}to{opacity:1;transform:none}}
 
 .task-body{flex:1;min-width:0}
 .task-title{font-size:13.5px;font-weight:600;margin-bottom:4px;line-height:1.4}
@@ -536,11 +637,336 @@ canvas.full-chart{width:100%!important;display:block}
   .right-col{flex-direction:column}
   .nav-btn{display:none}
 }
+
+/* ══════════════════════════════════════
+   AUTH OVERLAY
+══════════════════════════════════════ */
+#authOverlay{
+  position:fixed;inset:0;z-index:9000;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  background:var(--bg);
+  animation:pageIn .5s var(--ease) both;
+}
+#authOverlay.hiding{
+  animation:authHide .5s var(--ease) forwards;
+}
+@keyframes authHide{
+  to{opacity:0;transform:scale(1.04)}
+}
+
+.auth-card{
+  width:100%;max-width:420px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:40px 36px 36px;
+  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(124,91,255,.1);
+  position:relative;overflow:hidden;
+  animation:authCardIn .6s cubic-bezier(.34,1.56,.64,1) .1s both;
+}
+@keyframes authCardIn{
+  from{opacity:0;transform:translateY(32px) scale(.96)}
+  to{opacity:1;transform:none}
+}
+.auth-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(124,91,255,.5),rgba(200,75,255,.5),transparent);
+}
+
+.auth-logo{
+  display:flex;align-items:center;gap:12px;margin-bottom:32px;justify-content:center;
+}
+.auth-logo-icon{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--a3),var(--a1));
+  display:grid;place-items:center;
+  box-shadow:0 8px 24px rgba(124,91,255,.4);
+  animation:logoPulse 3s ease-in-out infinite;
+}
+.auth-logo h1{font-size:22px;font-weight:900;letter-spacing:-.03em}
+
+.auth-tabs{
+  display:flex;background:var(--surface);border-radius:14px;padding:4px;gap:4px;
+  margin-bottom:28px;border:1px solid var(--border);
+}
+.auth-tab{
+  flex:1;padding:9px;border-radius:10px;border:none;
+  background:transparent;color:var(--muted);
+  font-family:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .25s var(--ease);
+}
+.auth-tab.active{
+  background:linear-gradient(135deg,var(--a3),var(--a1));
+  color:#fff;
+  box-shadow:0 4px 16px rgba(124,91,255,.3);
+}
+
+.auth-field{margin-bottom:14px}
+.auth-label{
+  display:block;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:7px;
+}
+.auth-input{
+  width:100%;background:var(--input);
+  border:1.5px solid var(--border);border-radius:12px;
+  color:var(--text);font-family:inherit;font-size:14px;
+  padding:12px 16px;outline:none;
+  transition:border-color .25s,box-shadow .25s;
+}
+.auth-input::placeholder{color:var(--muted)}
+.auth-input:focus{
+  border-color:var(--a3);
+  box-shadow:0 0 0 4px rgba(124,91,255,.12);
+}
+.auth-input.error{
+  border-color:var(--red);
+  box-shadow:0 0 0 4px rgba(255,75,110,.12);
+  animation:shake .4s var(--ease);
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+
+.auth-error{
+  font-size:12px;color:var(--red);margin-top:-8px;margin-bottom:12px;
+  display:none;padding:0 4px;
+  animation:fadeIn .2s ease;
+}
+.auth-error.show{display:block}
+
+.auth-submit{
+  width:100%;padding:13px;border-radius:14px;
+  background:linear-gradient(135deg,var(--a3),var(--a1),var(--a2));
+  background-size:200%;
+  border:none;color:#fff;font-size:15px;font-weight:800;
+  font-family:inherit;cursor:pointer;
+  box-shadow:0 8px 24px rgba(124,91,255,.35);
+  transition:all .25s var(--ease);margin-top:8px;
+  position:relative;overflow:hidden;letter-spacing:.01em;
+}
+.auth-submit::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.auth-submit:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(124,91,255,.5);
+  background-position:100%;
+}
+.auth-submit:hover::before{opacity:1}
+.auth-submit:active{transform:scale(.98)}
+.auth-submit.loading{
+  pointer-events:none;opacity:.7;
+}
+.auth-submit.loading::after{
+  content:'';display:inline-block;
+  width:14px;height:14px;border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;
+  margin-left:10px;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.auth-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:20px 0;color:var(--muted);font-size:12px;
+}
+.auth-divider::before,.auth-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+.auth-footer{
+  text-align:center;font-size:12px;color:var(--muted);
+  margin-top:20px;line-height:1.6;
+}
+.auth-footer span{color:var(--a1);cursor:pointer;font-weight:600}
+.auth-footer span:hover{text-decoration:underline}
+
+/* password strength */
+.pw-strength{margin-top:6px;height:3px;border-radius:99px;background:var(--border);overflow:hidden}
+.pw-strength-bar{height:100%;border-radius:99px;transition:width .4s var(--ease),background .4s}
+
+/* user avatar in nav */
+.user-pill{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 14px 6px 6px;border-radius:20px;
+  border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all .25s var(--ease);
+}
+.user-pill:hover{border-color:var(--a3);box-shadow:0 0 16px rgba(124,91,255,.2)}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--a3),var(--a1));
+  display:grid;place-items:center;
+  font-size:12px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.user-name{font-size:13px;font-weight:600;color:var(--text)}
+
+/* ── AUTH OVERLAY ── */
+#authOverlay{
+  position:fixed;inset:0;z-index:9000;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+  transition:opacity .5s var(--ease);
+}
+#authOverlay.hidden{opacity:0;pointer-events:none}
+
+.auth-card{
+  width:100%;max-width:420px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:28px;padding:40px 36px;
+  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(124,91,255,.1);
+  position:relative;overflow:hidden;
+  animation:authCardIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes authCardIn{
+  from{opacity:0;transform:translateY(32px) scale(.95)}
+  to{opacity:1;transform:none}
+}
+.auth-card::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,91,255,.18),transparent 70%);
+  pointer-events:none;
+}
+
+.auth-logo{
+  display:flex;align-items:center;gap:12px;margin-bottom:32px;
+}
+.auth-logo-icon{
+  width:44px;height:44px;border-radius:13px;
+  background:linear-gradient(135deg,var(--a3),var(--a1));
+  display:grid;place-items:center;
+  box-shadow:0 4px 20px rgba(124,91,255,.4);
+}
+.auth-logo h1{font-size:20px;font-weight:900;letter-spacing:-.03em}
+.auth-logo p{font-size:12px;color:var(--muted)}
+
+.auth-tabs{
+  display:flex;gap:4px;background:var(--surface);
+  border-radius:14px;padding:4px;margin-bottom:28px;
+}
+.auth-tab{
+  flex:1;padding:9px;border-radius:11px;border:none;
+  background:transparent;color:var(--muted);
+  font-family:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s var(--ease);
+}
+.auth-tab.active{
+  background:var(--card2);color:var(--text);
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+
+.auth-field{
+  margin-bottom:14px;
+}
+.auth-field label{
+  display:block;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:7px;
+}
+.auth-input{
+  width:100%;padding:12px 16px;
+  background:var(--input);border:1.5px solid var(--border);
+  border-radius:12px;color:var(--text);
+  font-family:inherit;font-size:14px;outline:none;
+  transition:border-color .25s,box-shadow .25s;
+}
+.auth-input:focus{
+  border-color:var(--a3);
+  box-shadow:0 0 0 4px rgba(124,91,255,.14);
+}
+.auth-input.error{
+  border-color:var(--red);
+  box-shadow:0 0 0 4px rgba(255,75,110,.12);
+  animation:shake .4s var(--ease);
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}
+
+.auth-error{
+  font-size:12px;color:var(--red);margin-bottom:14px;
+  min-height:18px;transition:opacity .2s;
+  display:flex;align-items:center;gap:6px;
+}
+
+.auth-submit{
+  width:100%;padding:13px;border-radius:14px;
+  background:linear-gradient(135deg,var(--a3),var(--a1),var(--a2));
+  background-size:200%;
+  border:none;color:#fff;font-size:14px;font-weight:800;
+  font-family:inherit;cursor:pointer;
+  box-shadow:0 4px 20px rgba(124,91,255,.35);
+  transition:all .25s var(--ease);
+  position:relative;overflow:hidden;
+  margin-top:4px;
+}
+.auth-submit:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(124,91,255,.5);
+}
+.auth-submit:active{transform:scale(.98)}
+
+.auth-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:20px 0;color:var(--muted);font-size:12px;
+}
+.auth-divider::before,.auth-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+.auth-footer{
+  text-align:center;font-size:12px;color:var(--muted);margin-top:20px;
+}
+.auth-footer span{
+  color:var(--a1);cursor:pointer;font-weight:600;
+}
+.auth-footer span:hover{text-decoration:underline}
+
+/* password strength bar */
+.pw-strength{margin-top:8px;height:3px;border-radius:99px;background:var(--border);overflow:hidden}
+.pw-strength-bar{height:100%;border-radius:99px;transition:width .3s,background .3s;width:0}
+
+/* user pill in nav */
+.user-pill{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 12px 5px 5px;border-radius:20px;
+  border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all .25s var(--ease);
+}
+.user-pill:hover{border-color:var(--a3);box-shadow:0 0 16px rgba(124,91,255,.2)}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--a3),var(--a1));
+  display:grid;place-items:center;
+  font-size:12px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.user-name{font-size:13px;font-weight:600;color:var(--text)}
+
+.logout-btn{
+  padding:6px 13px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-size:12px;cursor:pointer;
+  font-family:inherit;font-weight:500;transition:all .2s;
+}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
 </style>
 </head>
 <body>
 
-<!-- AMBIENT -->
+<!-- AMBIENT BACKGROUND -->
 <div class="orb-wrap">
   <div class="orb orb1"></div>
   <div class="orb orb2"></div>
@@ -548,7 +974,64 @@ canvas.full-chart{width:100%!important;display:block}
 </div>
 <canvas id="particleCanvas"></canvas>
 <canvas id="confettiCanvas"></canvas>
-<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg">Task done!</span></div>
+<div id="cursor-glow"></div>
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg">Done!</span></div>
+
+<!-- AUTH OVERLAY -->
+<div id="authOverlay">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <circle cx="20" cy="12" r="2.2" fill="white" opacity="0.95"/>
+          <path d="M13.5 4.5L9.5 12.5H12.5L10.5 19.5L16.5 11H13.5L15.5 4.5Z" fill="white" opacity="0.95"/>
+        </svg>
+      </div>
+      <div><h1>Tasklight</h1><p>Track work. See progress.</p></div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign in</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Create account</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="auth-field">
+        <label>Username</label>
+        <input class="auth-input" id="loginUser" type="text" placeholder="Enter your username" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input class="auth-input" id="loginPass" type="password" placeholder="Enter your password" autocomplete="current-password">
+      </div>
+      <div class="auth-error" id="loginError"></div>
+      <button class="auth-submit" onclick="doLogin()">Sign in →</button>
+      <div class="auth-footer">No account? <span onclick="switchTab('signup')">Create one free</span></div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm" style="display:none">
+      <div class="auth-field">
+        <label>Username</label>
+        <input class="auth-input" id="signupUser" type="text" placeholder="Pick a username" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input class="auth-input" id="signupPass" type="password" placeholder="Create a password" autocomplete="new-password">
+        <div class="pw-strength"><div class="pw-strength-bar" id="pwBar"></div></div>
+      </div>
+      <div class="auth-field">
+        <label>Confirm password</label>
+        <input class="auth-input" id="signupPass2" type="password" placeholder="Repeat password" autocomplete="new-password">
+      </div>
+      <div class="auth-error" id="signupError"></div>
+      <button class="auth-submit" onclick="doSignup()">Create account →</button>
+      <div class="auth-footer">Already have an account? <span onclick="switchTab('login')">Sign in</span></div>
+    </div>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav>
@@ -568,7 +1051,11 @@ canvas.full-chart{width:100%!important;display:block}
   <div class="nav-right">
     <div class="streak-pill">🔥 <span class="s-num" id="streakNum">0</span> day streak</div>
     <button class="nav-btn" onclick="exportTasks()">↓ Export</button>
-
+    <div class="user-pill" id="userPill">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span class="user-name" id="userName">Guest</span>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sign out</button>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
   </div>
 </nav>
@@ -576,7 +1063,11 @@ canvas.full-chart{width:100%!important;display:block}
 <!-- HERO -->
 <section class="hero">
   <div class="eyebrow"><span class="eyebrow-dot"></span>Your day at a glance</div>
-  <h2>Get things done —<br>and <span class="grad1">see how</span><br><span class="grad2">it's going</span>.</h2>
+  <h2>
+    <span class="line1">Get things done —</span>
+    <span class="line2">and <span class="grad1">see how</span></span>
+    <span class="line3"><span class="grad2">it's going</span>.</span>
+  </h2>
   <p>Capture tasks, set priorities and due dates, and watch trends emerge. Your data stays on this device.</p>
 </section>
 
@@ -679,50 +1170,82 @@ canvas.full-chart{width:100%!important;display:block}
 (function(){
   const canvas=document.getElementById('particleCanvas');
   const ctx=canvas.getContext('2d');
-  let W,H,particles=[];
+  let W,H,mouse={x:-999,y:-999};
   function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}
   resize(); window.addEventListener('resize',resize);
+  window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+  window.addEventListener('mouseleave',()=>{mouse.x=-999;mouse.y=-999});
+
+  const COLORS=[[270,90,75],[300,90,70],[320,85,72],[250,80,78]];
 
   class Particle{
-    constructor(){this.reset()}
-    reset(){
+    constructor(){this.reset(true)}
+    reset(init=false){
       this.x=Math.random()*W;
-      this.y=Math.random()*H;
-      this.size=Math.random()*1.8+0.4;
-      this.speedX=(Math.random()-.5)*0.35;
-      this.speedY=(Math.random()-.5)*0.35;
-      this.opacity=Math.random()*.5+.1;
-      this.hue=Math.random()<.5?270:310;
+      this.y=init?Math.random()*H:Math.random()<.5?-10:H+10;
+      this.baseSize=Math.random()*2+0.5;
+      this.size=this.baseSize;
+      this.speedX=(Math.random()-.5)*0.4;
+      this.speedY=(Math.random()-.5)*0.4;
+      this.opacity=Math.random()*.55+.08;
+      this.baseOpacity=this.opacity;
+      const c=COLORS[Math.floor(Math.random()*COLORS.length)];
+      this.h=c[0];this.s=c[1];this.l=c[2];
+      this.twinkleSpeed=Math.random()*.02+.005;
+      this.twinkleOffset=Math.random()*Math.PI*2;
+      this.life=0;
     }
-    update(){
+    update(t){
+      this.life+=1;
+      // mouse repulsion
+      const dx=this.x-mouse.x;const dy=this.y-mouse.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){
+        const force=(120-dist)/120*0.8;
+        this.x+=dx/dist*force;
+        this.y+=dy/dist*force;
+      }
       this.x+=this.speedX; this.y+=this.speedY;
-      if(this.x<0||this.x>W||this.y<0||this.y>H) this.reset();
+      // twinkle
+      const tw=Math.sin(t*this.twinkleSpeed+this.twinkleOffset);
+      this.opacity=this.baseOpacity*(0.6+tw*0.4);
+      this.size=this.baseSize*(0.85+tw*0.15);
+      if(this.x<-20||this.x>W+20||this.y<-20||this.y>H+20) this.reset();
     }
     draw(){
       ctx.beginPath();
       ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-      ctx.fillStyle=`hsla(${this.hue},90%,75%,${this.opacity})`;
+      ctx.fillStyle=`hsla(${this.h},${this.s}%,${this.l}%,${this.opacity})`;
       ctx.fill();
     }
   }
 
-  for(let i=0;i<90;i++) particles.push(new Particle());
+  const particles=[];
+  for(let i=0;i<110;i++) particles.push(new Particle());
 
+  let t=0;
   function frame(){
+    t++;
     ctx.clearRect(0,0,W,H);
-    particles.forEach(p=>{p.update();p.draw()});
-    // draw connections
+    particles.forEach(p=>{p.update(t);p.draw()});
+    // connections with mouse proximity boost
     for(let i=0;i<particles.length;i++){
       for(let j=i+1;j<particles.length;j++){
         const dx=particles[i].x-particles[j].x;
         const dy=particles[i].y-particles[j].y;
         const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<100){
+        if(dist<110){
+          const alpha=(1-dist/110)*.1;
+          // boost connection near mouse
+          const mx=(particles[i].x+particles[j].x)/2;
+          const my=(particles[i].y+particles[j].y)/2;
+          const md=Math.sqrt((mx-mouse.x)**2+(my-mouse.y)**2);
+          const boost=md<200?1+(200-md)/200*1.5:1;
           ctx.beginPath();
           ctx.moveTo(particles[i].x,particles[i].y);
           ctx.lineTo(particles[j].x,particles[j].y);
-          ctx.strokeStyle=`rgba(124,91,255,${(1-dist/100)*.08})`;
-          ctx.lineWidth=.5;
+          ctx.strokeStyle=`rgba(124,91,255,${Math.min(alpha*boost,.25)})`;
+          ctx.lineWidth=.6;
           ctx.stroke();
         }
       }
@@ -742,16 +1265,23 @@ window.addEventListener('resize',()=>{confCanvas.width=innerWidth;confCanvas.hei
 
 let confettiPieces=[];
 function launchConfetti(x,y){
-  const colors=['#c84bff','#ff4bb8','#7c5bff','#4bffb8','#ffd84b','#ff4b6e','#fff'];
-  for(let i=0;i<60;i++){
+  const colors=['#c84bff','#ff4bb8','#7c5bff','#4bffb8','#ffd84b','#ff4b6e','#ffffff','#a78bfa'];
+  const shapes=['rect','circle','triangle','star'];
+  for(let i=0;i<80;i++){
+    const angle=Math.random()*Math.PI*2;
+    const speed=Math.random()*14+4;
     confettiPieces.push({
       x:x||innerWidth/2, y:y||innerHeight/2,
-      vx:(Math.random()-0.5)*12, vy:Math.random()*-14-4,
-      size:Math.random()*7+3,
+      vx:Math.cos(angle)*speed*(Math.random()*.6+.4),
+      vy:Math.sin(angle)*speed*(Math.random()*.6+.4)-6,
+      size:Math.random()*8+3,
       color:colors[Math.floor(Math.random()*colors.length)],
       rotation:Math.random()*360,
-      rotV:(Math.random()-0.5)*12,
-      gravity:0.5, alpha:1, shape:Math.random()<0.5?'rect':'circle'
+      rotV:(Math.random()-0.5)*16,
+      gravity:0.38,
+      drag:0.97,
+      alpha:1,
+      shape:shapes[Math.floor(Math.random()*shapes.length)]
     });
   }
   if(!confRunning) confFrame();
@@ -762,19 +1292,35 @@ function confFrame(){
   if(!confettiPieces.length){confRunning=false;cCtx.clearRect(0,0,confCanvas.width,confCanvas.height);return}
   confRunning=true;
   cCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
-  confettiPieces=confettiPieces.filter(p=>p.alpha>0);
+  confettiPieces=confettiPieces.filter(p=>p.alpha>0.01);
   confettiPieces.forEach(p=>{
-    p.x+=p.vx; p.vy+=p.gravity; p.y+=p.vy;
-    p.rotation+=p.rotV; p.alpha-=0.018;
+    p.vx*=p.drag; p.x+=p.vx;
+    p.vy+=p.gravity; p.vy*=p.drag; p.y+=p.vy;
+    p.rotation+=p.rotV; p.alpha-=0.014;
     cCtx.save();
     cCtx.globalAlpha=Math.max(0,p.alpha);
     cCtx.translate(p.x,p.y);
     cCtx.rotate(p.rotation*Math.PI/180);
     cCtx.fillStyle=p.color;
+    cCtx.strokeStyle=p.color;
+    cCtx.lineWidth=1;
     if(p.shape==='circle'){
       cCtx.beginPath();cCtx.arc(0,0,p.size/2,0,Math.PI*2);cCtx.fill();
-    } else {
-      cCtx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2);
+    } else if(p.shape==='rect'){
+      cCtx.fillRect(-p.size/2,-p.size/3,p.size,p.size/1.5);
+    } else if(p.shape==='triangle'){
+      cCtx.beginPath();cCtx.moveTo(0,-p.size/2);
+      cCtx.lineTo(p.size/2,p.size/2);cCtx.lineTo(-p.size/2,p.size/2);
+      cCtx.closePath();cCtx.fill();
+    } else if(p.shape==='star'){
+      cCtx.beginPath();
+      for(let k=0;k<5;k++){
+        const a=k*Math.PI*2/5-Math.PI/2;
+        const a2=a+Math.PI/5;
+        cCtx.lineTo(Math.cos(a)*p.size/2,Math.sin(a)*p.size/2);
+        cCtx.lineTo(Math.cos(a2)*p.size/4,Math.sin(a2)*p.size/4);
+      }
+      cCtx.closePath();cCtx.fill();
     }
     cCtx.restore();
   });
@@ -811,12 +1357,128 @@ document.addEventListener('click',e=>{
 });
 
 /* ════════════════════════════════
+   AUTH SYSTEM
+════════════════════════════════ */
+let currentUser = null;
+
+function getUsers(){ return JSON.parse(localStorage.getItem('tl_users')||'{}'); }
+function saveUsers(u){ localStorage.setItem('tl_users',JSON.stringify(u)); }
+
+function hashPass(p){
+  // simple deterministic hash (not cryptographic — for demo/localStorage use)
+  let h=0;
+  for(let i=0;i<p.length;i++){ h=((h<<5)-h)+p.charCodeAt(i); h|=0; }
+  return h.toString(36);
+}
+
+function switchTab(tab){
+  document.getElementById('loginForm').style.display  = tab==='login'  ? '' : 'none';
+  document.getElementById('signupForm').style.display = tab==='signup' ? '' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active',  tab==='login');
+  document.getElementById('tabSignup').classList.toggle('active', tab==='signup');
+  document.getElementById('loginError').textContent='';
+  document.getElementById('signupError').textContent='';
+}
+
+function setAuthError(id, msg){
+  document.getElementById(id).innerHTML = msg ? `⚠ ${msg}` : '';
+}
+function shakeInput(id){
+  const el=document.getElementById(id);
+  el.classList.add('error');
+  el.addEventListener('animationend',()=>el.classList.remove('error'),{once:true});
+}
+
+function doLogin(){
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!user){ shakeInput('loginUser'); setAuthError('loginError','Username is required'); return; }
+  if(!pass){ shakeInput('loginPass'); setAuthError('loginError','Password is required'); return; }
+  const users=getUsers();
+  if(!users[user]){ shakeInput('loginUser'); setAuthError('loginError','No account found with that username'); return; }
+  if(users[user].hash !== hashPass(pass)){ shakeInput('loginPass'); setAuthError('loginError','Incorrect password'); return; }
+  loginSuccess(user);
+}
+
+function doSignup(){
+  const user=document.getElementById('signupUser').value.trim();
+  const pass=document.getElementById('signupPass').value;
+  const pass2=document.getElementById('signupPass2').value;
+  if(!user){ shakeInput('signupUser'); setAuthError('signupError','Choose a username'); return; }
+  if(user.length<3){ shakeInput('signupUser'); setAuthError('signupError','Username must be at least 3 characters'); return; }
+  if(!pass){ shakeInput('signupPass'); setAuthError('signupError','Choose a password'); return; }
+  if(pass.length<6){ shakeInput('signupPass'); setAuthError('signupError','Password must be at least 6 characters'); return; }
+  if(pass!==pass2){ shakeInput('signupPass2'); setAuthError('signupError','Passwords don\'t match'); return; }
+  const users=getUsers();
+  if(users[user]){ shakeInput('signupUser'); setAuthError('signupError','That username is already taken'); return; }
+  users[user]={ hash: hashPass(pass), created: Date.now() };
+  saveUsers(users);
+  loginSuccess(user);
+}
+
+function loginSuccess(username){
+  currentUser=username;
+  localStorage.setItem('tl_session', username);
+  // Update nav
+  document.getElementById('userAvatar').textContent = username[0].toUpperCase();
+  document.getElementById('userName').textContent   = username;
+  // Hide overlay
+  const overlay=document.getElementById('authOverlay');
+  overlay.classList.add('hidden');
+  setTimeout(()=>overlay.style.display='none', 500);
+  // Load this user's tasks
+  allTasks = JSON.parse(localStorage.getItem(`tl_tasks_${username}`)||'[]');
+  refresh();
+  showToast(`Welcome back, ${username}! 👋`,'🎯');
+}
+
+function doLogout(){
+  currentUser=null;
+  localStorage.removeItem('tl_session');
+  allTasks=[];
+  const overlay=document.getElementById('authOverlay');
+  overlay.style.display='flex';
+  requestAnimationFrame(()=>overlay.classList.remove('hidden'));
+  // Reset form
+  ['loginUser','loginPass','signupUser','signupPass','signupPass2'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  switchTab('login');
+  refresh();
+  showToast('Signed out','👋');
+}
+
+// password strength meter
+document.getElementById('signupPass').addEventListener('input', function(){
+  const v=this.value, bar=document.getElementById('pwBar');
+  let score=0;
+  if(v.length>=6) score++;
+  if(v.length>=10) score++;
+  if(/[A-Z]/.test(v)) score++;
+  if(/[0-9]/.test(v)) score++;
+  if(/[^A-Za-z0-9]/.test(v)) score++;
+  const pct=[0,20,40,65,85,100][score];
+  const col=['','#ff4b6e','#ffd84b','#ff4bb8','#7c5bff','#4bffb8'][score];
+  bar.style.width=pct+'%'; bar.style.background=col;
+});
+
+// Enter key support for auth forms
+['loginUser','loginPass'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter') doLogin();});
+});
+['signupUser','signupPass','signupPass2'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter') doSignup();});
+});
+
+/* ════════════════════════════════
    STATE
 ════════════════════════════════ */
-let allTasks=JSON.parse(localStorage.getItem('tl_tasks')||'[]');
+let allTasks=[];
 let currentFilter='all';
 const TODAY=new Date().toISOString().split('T')[0];
-function save(){localStorage.setItem('tl_tasks',JSON.stringify(allTasks))}
+function save(){
+  if(currentUser) localStorage.setItem(`tl_tasks_${currentUser}`,JSON.stringify(allTasks));
+}
 
 /* ════════════════════════════════
    THEME
@@ -1294,8 +1956,47 @@ window.addEventListener('resize',()=>{
 
 document.getElementById('taskList').addEventListener('scroll', updateScrollMask);
 
-// Boot
-refresh();
+/* ════════════════════════════════
+   CURSOR GLOW + 3D TILT
+════════════════════════════════ */
+const glow=document.getElementById('cursor-glow');
+let glowX=0,glowY=0,targetX=0,targetY=0;
+document.addEventListener('mousemove',e=>{targetX=e.clientX;targetY=e.clientY});
+(function animGlow(){
+  glowX+=(targetX-glowX)*.1;
+  glowY+=(targetY-glowY)*.1;
+  glow.style.left=glowX+'px';
+  glow.style.top=glowY+'px';
+  requestAnimationFrame(animGlow);
+})();
+
+// 3D tilt on stat cards and panels
+document.querySelectorAll('.stat-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const cx=r.left+r.width/2, cy=r.top+r.height/2;
+    const dx=(e.clientX-cx)/r.width*2;
+    const dy=(e.clientY-cy)/r.height*2;
+    card.style.transform=`translateY(-6px) scale(1.02) rotateX(${-dy*7}deg) rotateY(${dx*7}deg)`;
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='';
+    card.style.transition='transform .6s cubic-bezier(.34,1.56,.64,1)';
+    setTimeout(()=>card.style.transition='',600);
+  });
+});
+
+// Boot — check for existing session
+(function(){
+  const session = localStorage.getItem('tl_session');
+  if(session && getUsers()[session]){
+    loginSuccess(session);
+  } else {
+    // Show auth overlay, hide app content visually until login
+    document.getElementById('authOverlay').style.display='flex';
+    refresh(); // render empty state
+  }
+})();
 </script>
 </body>
 </html>
