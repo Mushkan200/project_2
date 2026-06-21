@@ -156,24 +156,65 @@ nav{
 
 .nav-right{display:flex;gap:9px;align-items:center}
 
-/* ── PAGE TABS ── */
+/* ── SUB-NAV: dedicated page-switcher strip ── */
+.subnav{
+  position:sticky;top:0;z-index:90;
+  display:flex;justify-content:center;
+  padding:16px 40px;
+  background:var(--nav);
+  backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid var(--border);
+  transition:background .4s,border-color .4s;
+}
+
 .page-tabs{
-  display:flex;gap:4px;background:var(--surface);
-  border:1px solid var(--border);border-radius:20px;padding:4px;
+  position:relative;display:flex;gap:4px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:6px;
+  box-shadow:0 8px 28px rgba(0,0,0,.18),inset 0 1px 2px rgba(0,0,0,.1);
 }
+.page-tabs::before{
+  content:'';position:absolute;top:6px;left:6px;
+  width:var(--tab-w,160px);height:calc(100% - 12px);
+  border-radius:15px;
+  background:linear-gradient(135deg,var(--a3),var(--a1),var(--a2));
+  background-size:200%;
+  box-shadow:0 6px 24px rgba(124,91,255,.5),0 0 0 1px rgba(255,255,255,.08) inset;
+  transform:translateX(var(--tab-x,0));
+  transition:transform .45s cubic-bezier(.65,0,.35,1),width .45s cubic-bezier(.65,0,.35,1);
+  z-index:0;
+  animation:tabGlowShift 6s ease-in-out infinite;
+}
+@keyframes tabGlowShift{0%,100%{background-position:0%}50%{background-position:100%}}
+
 .page-tab{
-  padding:8px 18px;border-radius:16px;border:none;
+  position:relative;z-index:1;
+  padding:10px 22px 10px 16px;border-radius:15px;border:none;
   background:transparent;color:var(--muted);
-  font-family:inherit;font-size:13px;font-weight:700;
-  cursor:pointer;transition:all .25s var(--ease);
-  display:flex;align-items:center;gap:6px;white-space:nowrap;
+  font-family:inherit;cursor:pointer;
+  display:flex;align-items:center;gap:11px;white-space:nowrap;
+  transition:color .3s var(--ease);
 }
-.page-tab:hover{color:var(--text2)}
-.page-tab.active{
-  background:linear-gradient(135deg,var(--a3),var(--a1));
-  color:#fff;
-  box-shadow:0 4px 16px rgba(124,91,255,.35);
+.page-tab-icon{
+  width:30px;height:30px;border-radius:10px;flex-shrink:0;
+  display:grid;place-items:center;
+  background:var(--surface);color:inherit;
+  transition:background .3s var(--ease),transform .3s var(--ease);
 }
+.page-tab.active .page-tab-icon{
+  background:rgba(255,255,255,.18);
+  transform:scale(1.04);
+}
+.page-tab-text{display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.15}
+.page-tab-label{font-size:14px;font-weight:800;letter-spacing:-.01em}
+.page-tab-sub{
+  font-size:10.5px;font-weight:600;color:var(--muted);
+  transition:color .3s var(--ease);
+}
+.page-tab.active{color:#fff}
+.page-tab.active .page-tab-sub{color:rgba(255,255,255,.78)}
+.page-tab:not(.active):hover{color:var(--text2)}
+.page-tab:not(.active):hover .page-tab-icon{background:var(--card2)}
 
 /* ── PAGE SECTIONS ── */
 .page-section{display:none}
@@ -459,7 +500,17 @@ nav{
   cursor:pointer;font-size:13px;transition:all .2s var(--ease);flex-shrink:0;
 }
 .date-pop-nav:hover{border-color:var(--a1);color:var(--a1);background:var(--card)}
-.date-pop-title{font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.date-pop-title{
+  font-size:13.5px;font-weight:800;letter-spacing:-.01em;
+  cursor:pointer;padding:4px 10px;border-radius:10px;
+  transition:background .2s;display:inline-flex;align-items:center;gap:4px;
+}
+.date-pop-title:hover{background:var(--surface)}
+.date-pop-title::after{
+  content:'';width:0;height:0;margin-left:1px;
+  border-left:4px solid transparent;border-right:4px solid transparent;
+  border-top:5px solid var(--muted);opacity:.7;
+}
 .date-pop-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
 .date-pop-weekdays span{
   text-align:center;font-size:10px;font-weight:700;color:var(--muted);
@@ -877,27 +928,65 @@ canvas.full-chart{width:100%!important;display:block}
   .right-col{flex-direction:column}
   .nav-btn{display:none}
   .sort-wrap{margin-left:0;width:100%}
-  nav{flex-wrap:wrap;gap:10px;padding-bottom:10px}
-  .page-tabs{order:3;width:100%}
-  .page-tab{flex:1;justify-content:center}
 
-  /* date picker: full-width input, centered fixed sheet on mobile */
-  .date-input{width:118px;font-size:13px;padding:9px 32px 9px 12px}
+  .subnav{padding:12px 16px}
+  .page-tabs{width:100%;padding:5px}
+  .page-tab{flex:1;padding:9px 10px;justify-content:center;gap:8px}
+  .page-tab-icon{width:26px;height:26px}
+  .page-tab-icon svg{width:15px;height:15px}
+  .page-tab-sub{display:none}
+  .page-tab-label{font-size:13px}
+  .page-tab-text{justify-content:center}
+
+  /* date picker: full-width field + comfortable bottom sheet on mobile */
+  .form-controls{gap:10px}
+  .date-field{width:100%;order:1}
+  .date-input{width:100%;font-size:15px;padding:13px 38px 13px 14px;border-radius:14px}
+  .date-input.edit-sel-date{font-size:14px;padding:11px 36px 11px 13px}
+  .edit-row{gap:10px}
+  .edit-row .date-field{order:0}
+  .date-field-icon{right:13px}
+  .date-clear{right:36px;width:20px;height:20px;font-size:11px}
+
   .date-popover{
     position:fixed;top:auto;bottom:0;left:0;right:0;
-    width:auto;max-width:none;border-radius:22px 22px 0 0;
-    padding:16px 16px calc(16px + env(safe-area-inset-bottom));
-    transform:translateY(100%);box-shadow:0 -16px 48px rgba(0,0,0,.5);
+    width:auto;max-width:none;border-radius:24px 24px 0 0;
+    padding:14px 18px calc(18px + env(safe-area-inset-bottom));
+    transform:translateY(100%);box-shadow:0 -16px 56px rgba(0,0,0,.55);
+    touch-action:none;
   }
   .date-popover.show{transform:translateY(0)}
-  .date-popover::before{
-    content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
-    width:36px;height:4px;border-radius:99px;background:var(--border);
+  .date-popover.dragging{transition:none}
+  .date-pop-grab{
+    position:absolute;top:0;left:0;right:0;height:26px;
+    display:flex;align-items:center;justify-content:center;cursor:grab;
   }
-  .date-pop-head{margin-top:10px}
-  .date-pop-nav{width:34px;height:34px;font-size:15px}
-  .date-pop-day{font-size:14px;min-height:38px}
-  .date-pop-foot button{padding:11px;font-size:13px}
+  .date-pop-grab::before{
+    content:'';width:38px;height:4.5px;border-radius:99px;background:var(--border2);
+  }
+  .date-pop-head{margin-top:16px}
+  .date-pop-nav{width:38px;height:38px;font-size:17px}
+  .date-pop-title{font-size:15.5px;padding:7px 14px}
+  .date-pop-title:active{background:var(--surface)}
+  .date-pop-weekdays span{font-size:10.5px;padding:6px 0}
+  .date-pop-day{font-size:15px;min-height:42px;border-radius:12px}
+  .date-pop-foot button{padding:13px;font-size:13.5px;border-radius:14px}
+
+  .date-pop-yeargrid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    max-height:264px;overflow-y:auto;padding:2px;
+  }
+  .date-pop-year{
+    padding:14px 6px;border-radius:14px;text-align:center;
+    font-size:14.5px;font-weight:700;color:var(--text);
+    background:var(--surface);border:1.5px solid transparent;cursor:pointer;
+    transition:all .15s var(--ease);
+  }
+  .date-pop-year:hover{border-color:var(--a3)}
+  .date-pop-year.current-year{
+    background:linear-gradient(135deg,var(--a3),var(--a1));color:#fff;
+  }
+
   #datePickerScrim{display:block}
 }
 
@@ -1312,10 +1401,6 @@ canvas.full-chart{width:100%!important;display:block}
     </div>
     <div class="logo-text"><h1>Tasklight</h1><p>Track work. See progress.</p></div>
   </div>
-  <div class="page-tabs" id="pageTabs">
-    <button class="page-tab active" id="navTasks" onclick="showPage('tasks')">✓ Tasks</button>
-    <button class="page-tab" id="navAnalytics" onclick="showPage('analytics')">📊 Analytics</button>
-  </div>
   <div class="nav-right">
     <div class="streak-pill">🔥 <span class="s-num" id="streakNum">0</span> day streak</div>
     <button class="nav-btn" id="notifyBtn" onclick="requestNotifyPermission()" title="Get browser reminders for due tasks">🔔 Reminders</button>
@@ -1328,6 +1413,30 @@ canvas.full-chart{width:100%!important;display:block}
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
   </div>
 </nav>
+
+<!-- SUB-NAV: page switcher -->
+<div class="subnav">
+  <div class="page-tabs" id="pageTabs">
+    <button class="page-tab active" id="navTasks" onclick="showPage('tasks')">
+      <span class="page-tab-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      </span>
+      <span class="page-tab-text">
+        <span class="page-tab-label">Tasks</span>
+        <span class="page-tab-sub">Your to-do list</span>
+      </span>
+    </button>
+    <button class="page-tab" id="navAnalytics" onclick="showPage('analytics')">
+      <span class="page-tab-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-6 3 3 5-8"/></svg>
+      </span>
+      <span class="page-tab-text">
+        <span class="page-tab-label">Analytics</span>
+        <span class="page-tab-sub">Trends &amp; breakdowns</span>
+      </span>
+    </button>
+  </div>
+</div>
 
 <!-- ════════ TASKS PAGE ════════ -->
 <div class="page-section active" id="pageTasks">
@@ -1813,17 +1922,38 @@ function save(){
 /* ════════════════════════════════
    PAGE NAVIGATION
 ════════════════════════════════ */
+function positionSubnav(){
+  const navEl=document.querySelector('nav');
+  const subnavEl=document.querySelector('.subnav');
+  if(!navEl||!subnavEl) return;
+  subnavEl.style.top=navEl.offsetHeight+'px';
+}
+function positionTabIndicator(){
+  const wrap=document.getElementById('pageTabs');
+  const activeTab=wrap.querySelector('.page-tab.active');
+  if(!wrap||!activeTab) return;
+  const wrapRect=wrap.getBoundingClientRect();
+  const tabRect=activeTab.getBoundingClientRect();
+  wrap.style.setProperty('--tab-x', (tabRect.left-wrapRect.left-6)+'px');
+  wrap.style.setProperty('--tab-w', tabRect.width+'px');
+}
+
 function showPage(page){
   currentPage=page;
   document.getElementById('pageTasks').classList.toggle('active', page==='tasks');
   document.getElementById('pageAnalytics').classList.toggle('active', page==='analytics');
   document.getElementById('navTasks').classList.toggle('active', page==='tasks');
   document.getElementById('navAnalytics').classList.toggle('active', page==='analytics');
+  positionTabIndicator();
   if(page==='analytics'){
     // canvases were hidden (display:none) so their measured size was 0 — redraw now that they're visible
     requestAnimationFrame(()=>{ drawAllCharts(); renderActivity(); });
   }
 }
+function refreshTabLayout(){ positionSubnav(); positionTabIndicator(); }
+window.addEventListener('resize',refreshTabLayout);
+window.addEventListener('load',refreshTabLayout);
+document.addEventListener('DOMContentLoaded',()=>setTimeout(refreshTabLayout,50));
 
 /* ════════════════════════════════
    THEME
@@ -1923,13 +2053,15 @@ function buildDatePopover(inputId){
   pop.className='date-popover';
   pop.id='datePop_'+inputId;
   pop.innerHTML=`
+    <div class="date-pop-grab" data-role="grab"></div>
     <div class="date-pop-head">
       <button type="button" class="date-pop-nav" data-act="prev">‹</button>
-      <span class="date-pop-title" data-role="title"></span>
+      <span class="date-pop-title" data-role="title" data-act="toggle-year"></span>
       <button type="button" class="date-pop-nav" data-act="next">›</button>
     </div>
-    <div class="date-pop-weekdays">${WEEKDAY_LETTERS.map(w=>`<span>${w}</span>`).join('')}</div>
+    <div class="date-pop-weekdays" data-role="weekdays">${WEEKDAY_LETTERS.map(w=>`<span>${w}</span>`).join('')}</div>
     <div class="date-pop-grid" data-role="grid"></div>
+    <div class="date-pop-yeargrid" data-role="yeargrid" style="display:none"></div>
     <div class="date-pop-foot">
       <button type="button" data-act="today">Today</button>
       <button type="button" data-act="clear">Clear</button>
@@ -1938,16 +2070,102 @@ function buildDatePopover(inputId){
   pop.addEventListener('click',e=>e.stopPropagation());
   pop.querySelector('[data-act="prev"]').onclick=()=>shiftDatePopoverMonth(inputId,-1);
   pop.querySelector('[data-act="next"]').onclick=()=>shiftDatePopoverMonth(inputId,1);
+  pop.querySelector('[data-role="title"]').onclick=()=>toggleYearView(inputId);
   pop.querySelector('[data-act="today"]').onclick=()=>{
     const t=new Date();
     setDateInputValue(inputId,t.toISOString().split('T')[0]);
     openDatePicker.viewYear=t.getFullYear();
     openDatePicker.viewMonth=t.getMonth();
+    showMonthView(inputId);
     renderDatePopoverGrid(inputId);
   };
   pop.querySelector('[data-act="clear"]').onclick=()=>clearDatePicker(inputId);
   pop.querySelector('[data-act="done"]').onclick=()=>closeAllDatePickers();
+  attachSwipeHandlers(pop,inputId);
   return pop;
+}
+
+function showMonthView(inputId){
+  if(!openDatePicker||openDatePicker.inputId!==inputId) return;
+  const {popoverEl}=openDatePicker;
+  popoverEl.querySelector('[data-role="grid"]').style.display='';
+  popoverEl.querySelector('[data-role="weekdays"]').style.display='';
+  popoverEl.querySelector('[data-role="yeargrid"]').style.display='none';
+  openDatePicker.yearViewOpen=false;
+}
+
+function toggleYearView(inputId){
+  if(!openDatePicker||openDatePicker.inputId!==inputId) return;
+  const {popoverEl,viewYear}=openDatePicker;
+  const yearGrid=popoverEl.querySelector('[data-role="yeargrid"]');
+  const monthGrid=popoverEl.querySelector('[data-role="grid"]');
+  const weekdays=popoverEl.querySelector('[data-role="weekdays"]');
+  const opening=yearGrid.style.display==='none';
+  openDatePicker.yearViewOpen=opening;
+  if(opening){
+    const startYear=viewYear-7;
+    let html='';
+    for(let y=startYear;y<startYear+15;y++){
+      html+=`<button type="button" class="date-pop-year${y===viewYear?' current-year':''}" data-year="${y}">${y}</button>`;
+    }
+    yearGrid.innerHTML=html;
+    yearGrid.querySelectorAll('.date-pop-year').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        openDatePicker.viewYear=parseInt(btn.dataset.year,10);
+        showMonthView(inputId);
+        renderDatePopoverGrid(inputId);
+      });
+    });
+    yearGrid.style.display='grid';
+    monthGrid.style.display='none';
+    weekdays.style.display='none';
+  } else {
+    showMonthView(inputId);
+  }
+}
+
+function attachSwipeHandlers(pop,inputId){
+  // Swipe down on the grab handle to dismiss (mobile bottom sheet)
+  const grab=pop.querySelector('[data-role="grab"]');
+  let startY=0,currentY=0,dragging=false;
+  function onStart(e){
+    dragging=true; startY=e.touches[0].clientY; currentY=startY;
+    pop.classList.add('dragging');
+  }
+  function onMove(e){
+    if(!dragging) return;
+    currentY=e.touches[0].clientY;
+    const dy=Math.max(0,currentY-startY);
+    pop.style.transform=`translateY(${dy}px)`;
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging=false;
+    pop.classList.remove('dragging');
+    const dy=currentY-startY;
+    pop.style.transform='';
+    if(dy>80) closeAllDatePickers();
+  }
+  grab.addEventListener('touchstart',onStart,{passive:true});
+  grab.addEventListener('touchmove',onMove,{passive:true});
+  grab.addEventListener('touchend',onEnd);
+
+  // Swipe left/right on the day grid to change months (mobile only)
+  const grid=pop.querySelector('[data-role="grid"]');
+  let swipeStartX=0,swipeStartY=0,swiping=false;
+  grid.addEventListener('touchstart',e=>{
+    if(window.innerWidth>720) return;
+    swipeStartX=e.touches[0].clientX; swipeStartY=e.touches[0].clientY; swiping=true;
+  },{passive:true});
+  grid.addEventListener('touchend',e=>{
+    if(!swiping) return;
+    swiping=false;
+    const dx=e.changedTouches[0].clientX-swipeStartX;
+    const dy=e.changedTouches[0].clientY-swipeStartY;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5){
+      shiftDatePopoverMonth(inputId, dx<0?1:-1);
+    }
+  });
 }
 
 function renderDatePopoverGrid(inputId){
@@ -2012,7 +2230,7 @@ function openDatePickerFor(inputId){
 
   const iso=isoFromInput(inputId);
   const base=iso?new Date(iso+'T00:00:00'):new Date();
-  openDatePicker={inputId,popoverEl:pop,viewYear:base.getFullYear(),viewMonth:base.getMonth()};
+  openDatePicker={inputId,popoverEl:pop,viewYear:base.getFullYear(),viewMonth:base.getMonth(),yearViewOpen:false};
   renderDatePopoverGrid(inputId);
 
   // flip to align right if it would overflow the viewport (desktop only)
@@ -2020,6 +2238,9 @@ function openDatePickerFor(inputId){
     if(window.innerWidth>720){
       const r=pop.getBoundingClientRect();
       if(r.right>window.innerWidth-12) pop.classList.add('align-right');
+    } else {
+      // lock background scroll while the mobile sheet is open
+      document.body.style.overflow='hidden';
     }
     pop.classList.add('show');
   });
@@ -2036,6 +2257,7 @@ function closeAllDatePickers(){
     openDatePicker=null;
   }
   document.getElementById('datePickerScrim').classList.remove('show');
+  document.body.style.overflow='';
 }
 
 // Delegate clicks: opening a date field, and closing pickers when clicking elsewhere
@@ -2123,20 +2345,6 @@ function processRecurringTasks(){
     }
   });
   if(changed) save();
-}
-
-function deleteTask(id){
-  const item=document.querySelector(`.task-item[data-id="${id}"]`);
-  if(item){
-    item.classList.add('removing');
-    setTimeout(()=>{
-      allTasks=allTasks.filter(t=>t.id!==id);
-      save(); refresh();
-    },420);
-  } else {
-    allTasks=allTasks.filter(t=>t.id!==id);
-    save(); refresh();
-  }
 }
 
 function setFilter(f,el){
@@ -2336,7 +2544,6 @@ function renderTasks(){
         </div>
       </div>
       <button class="edit-icon-btn" onclick="event.stopPropagation();startEdit('${t.id}')" title="Edit task">✎</button>
-      <button class="edit-icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete task">✕</button>
     </div>`;
   }).join('');
   requestAnimationFrame(updateScrollMask);
@@ -2873,6 +3080,7 @@ document.querySelectorAll('.stat-card').forEach(card=>{
 
 // Boot — check for existing session
 (function(){
+  positionTabIndicator();
   const session = localStorage.getItem('tl_session');
   if(session && getUsers()[session]){
     loginSuccess(session);
