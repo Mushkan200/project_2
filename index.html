@@ -895,14 +895,25 @@ canvas.full-chart{width:100%!important;display:block}
 .toast{
   position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);
   background:var(--card2);border:1px solid var(--border);
-  border-radius:14px;padding:12px 22px;font-size:13px;font-weight:600;
+  border-radius:14px;padding:12px 14px 12px 22px;font-size:13px;font-weight:600;
   display:flex;align-items:center;gap:10px;
   box-shadow:0 16px 48px rgba(0,0,0,.4);
-  z-index:9998;transition:transform .4s var(--ease),opacity .4s;opacity:0;
+  z-index:9998;transition:transform .4s var(--ease),opacity .4s,border-color .3s;opacity:0;
   white-space:nowrap;
+  max-width:calc(100vw - 32px);
 }
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-.toast-icon{font-size:18px}
+.toast.error{border-color:var(--red)}
+.toast-icon{font-size:18px;flex-shrink:0}
+#toastMsg{overflow:hidden;text-overflow:ellipsis}
+.toast-undo{
+  padding:6px 14px;border-radius:18px;margin-left:4px;
+  border:1.5px solid var(--a3);background:transparent;color:var(--a1);
+  font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;
+  transition:all .2s var(--ease);white-space:nowrap;
+}
+.toast-undo:hover{background:var(--a3);color:#fff;box-shadow:0 4px 14px rgba(124,91,255,.4)}
+.toast-undo:active{transform:scale(.95)}
 
 /* ── RIPPLE ── */
 .ripple{
@@ -931,6 +942,15 @@ canvas.full-chart{width:100%!important;display:block}
   .user-name{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .user-menu{width:188px;right:-8px}
 
+  .toast{
+    left:16px;right:16px;transform:translateY(80px);
+    white-space:normal;max-width:none;border-radius:16px;
+    align-items:flex-start;
+  }
+  .toast.show{transform:translateY(0)}
+  #toastMsg{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.4}
+  .toast-undo{margin-left:auto;flex-shrink:0}
+
   .subnav{padding:12px 16px}
   .page-tabs{width:100%;padding:5px}
   .page-tab{flex:1;padding:9px 10px;justify-content:center;gap:8px}
@@ -955,13 +975,13 @@ canvas.full-chart{width:100%!important;display:block}
     width:auto;max-width:none;border-radius:24px 24px 0 0;
     padding:14px 18px calc(18px + env(safe-area-inset-bottom));
     transform:translateY(100%);box-shadow:0 -16px 56px rgba(0,0,0,.55);
-    touch-action:none;
   }
   .date-popover.show{transform:translateY(0)}
   .date-popover.dragging{transition:none}
   .date-pop-grab{
     position:absolute;top:0;left:0;right:0;height:26px;
     display:flex;align-items:center;justify-content:center;cursor:grab;
+    touch-action:none;
   }
   .date-pop-grab::before{
     content:'';width:38px;height:4.5px;border-radius:99px;background:var(--border2);
@@ -1345,7 +1365,7 @@ canvas.full-chart{width:100%!important;display:block}
 <canvas id="particleCanvas"></canvas>
 <canvas id="confettiCanvas"></canvas>
 <div id="cursor-glow"></div>
-<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg">Done!</span></div>
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg">Done!</span><button class="toast-undo" id="toastUndo" style="display:none">Undo</button></div>
 <div id="datePickerScrim" onclick="closeAllDatePickers()"></div>
 
 <!-- AUTH OVERLAY -->
@@ -1798,13 +1818,29 @@ function confFrame(){
    TOAST
 ════════════════════════════════ */
 let toastTimer;
-function showToast(msg,icon='✓'){
+function showToast(msg,icon='✓',opts={}){
   const t=document.getElementById('toast');
+  const undoBtn=document.getElementById('toastUndo');
   document.getElementById('toastMsg').textContent=msg;
   t.querySelector('.toast-icon').textContent=icon;
+  t.classList.toggle('error',!!opts.error);
+
+  if(opts.onUndo){
+    undoBtn.style.display='';
+    undoBtn.onclick=()=>{
+      opts.onUndo();
+      t.classList.remove('show');
+      clearTimeout(toastTimer);
+    };
+  } else {
+    undoBtn.style.display='none';
+    undoBtn.onclick=null;
+  }
+
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+  const dur=opts.duration||(opts.onUndo?5000:2400);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),dur);
 }
 
 /* ════════════════════════════════
@@ -1828,8 +1864,18 @@ document.addEventListener('click',e=>{
 ════════════════════════════════ */
 let currentUser = null;
 
-function getUsers(){ return JSON.parse(localStorage.getItem('tl_users')||'{}'); }
-function saveUsers(u){ localStorage.setItem('tl_users',JSON.stringify(u)); }
+function getUsers(){
+  try{ return JSON.parse(localStorage.getItem('tl_users')||'{}'); }
+  catch(err){ console.error('Tasklight: could not read accounts:',err); return {}; }
+}
+function saveUsers(u){
+  try{ localStorage.setItem('tl_users',JSON.stringify(u)); return true; }
+  catch(err){
+    console.error('Tasklight: could not save account:',err);
+    showToast("Couldn't save your account — storage may be full or blocked",'⚠️',{error:true,duration:4500});
+    return false;
+  }
+}
 
 function hashPass(p){
   // simple deterministic hash (not cryptographic — for demo/localStorage use)
@@ -1879,13 +1925,14 @@ function doSignup(){
   const users=getUsers();
   if(users[user]){ shakeInput('signupUser'); setAuthError('signupError','That username is already taken'); return; }
   users[user]={ hash: hashPass(pass), created: Date.now() };
-  saveUsers(users);
+  if(!saveUsers(users)) return;
   loginSuccess(user);
 }
 
 function loginSuccess(username){
   currentUser=username;
-  localStorage.setItem('tl_session', username);
+  try{ localStorage.setItem('tl_session', username); }
+  catch(err){ console.error('Tasklight: could not persist session:',err); }
   // Update nav
   document.getElementById('userAvatar').textContent = username[0].toUpperCase();
   document.getElementById('userName').textContent   = username;
@@ -1896,11 +1943,22 @@ function loginSuccess(username){
   overlay.classList.add('hidden');
   setTimeout(()=>overlay.style.display='none', 500);
   // Load this user's tasks
-  allTasks = JSON.parse(localStorage.getItem(`tl_tasks_${username}`)||'[]');
+  let corrupted=false;
+  try{
+    allTasks = JSON.parse(localStorage.getItem(`tl_tasks_${username}`)||'[]');
+  }catch(err){
+    console.error('Tasklight: saved tasks were corrupted, starting fresh:',err);
+    allTasks=[];
+    corrupted=true;
+  }
   processRecurringTasks();
   refresh();
   scheduleDueNotifications();
-  showToast(`Welcome back, ${username}! 👋`,'🎯');
+  if(corrupted){
+    showToast("Your saved tasks couldn't be read and have been reset",'⚠️',{error:true,duration:4500});
+  } else {
+    showToast(`Welcome back, ${username}! 👋`,'🎯');
+  }
 }
 
 function toggleUserMenu(){
@@ -1970,7 +2028,20 @@ let editingId=null;
 let currentPage='tasks';
 const TODAY=new Date().toISOString().split('T')[0];
 function save(){
-  if(currentUser) localStorage.setItem(`tl_tasks_${currentUser}`,JSON.stringify(allTasks));
+  if(!currentUser) return true;
+  try{
+    localStorage.setItem(`tl_tasks_${currentUser}`,JSON.stringify(allTasks));
+    return true;
+  }catch(err){
+    console.error('Tasklight save failed:',err);
+    const isQuota = err && (err.name==='QuotaExceededError' || err.name==='NS_ERROR_DOM_QUOTA_REACHED' || err.code===22 || err.code===1014);
+    showToast(
+      isQuota ? "Storage is full — your last change wasn't saved" : "Couldn't save — your last change wasn't saved",
+      '⚠️',
+      {error:true,duration:4500}
+    );
+    return false;
+  }
 }
 
 /* ════════════════════════════════
@@ -2018,7 +2089,8 @@ function toggleTheme(){
   const cur=document.documentElement.getAttribute('data-theme');
   const next=cur==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('tl_theme',next);
+  try{ localStorage.setItem('tl_theme',next); }
+  catch(err){ console.error('Tasklight: could not save theme preference:',err); }
   const btn=document.getElementById('themeBtn');
   btn.textContent=next==='dark'?'🌙':'☀️';
   btn.style.animation='none'; requestAnimationFrame(()=>{btn.style.animation=''});
@@ -2340,8 +2412,9 @@ function addTask(){
     setTimeout(()=>{f.style.borderColor='';f.style.boxShadow=''},1000);
     return;
   }
+  const newId=crypto.randomUUID();
   allTasks.push({
-    id:crypto.randomUUID(),title,
+    id:newId,title,
     notes:document.getElementById('taskNotes').value.trim(),
     priority:document.getElementById('taskPriority').value,
     due_date:isoFromInput('taskDue'),
@@ -2355,7 +2428,13 @@ function addTask(){
   setDateInputValue('taskDue','');
   document.getElementById('taskPriority').value='Medium';
   document.getElementById('taskRecur').value='';
-  showToast('Task added!','✨');
+  showToast('Task added!','✨',{
+    onUndo:()=>{
+      allTasks=allTasks.filter(x=>x.id!==newId);
+      save(); refresh();
+      showToast('Task removed','↩️');
+    }
+  });
 }
 
 function nextDueDate(dateStr,recurrence){
@@ -2369,12 +2448,17 @@ function nextDueDate(dateStr,recurrence){
 function toggleDone(id,el){
   const t=allTasks.find(t=>t.id===id);
   if(!t) return;
+
+  // snapshot prior state so a completion can be undone, including any pending recurrence rollover
+  const prevState={done:t.done,done_at:t.done_at,due_date:t.due_date};
+
   t.done=!t.done; t.done_at=t.done?new Date().toISOString():null;
 
+  let rolloverTimer=null;
   if(t.done && t.recurrence){
     // schedule the next occurrence, then reset this task to active for its new date
     const newDue=nextDueDate(t.due_date,t.recurrence);
-    setTimeout(()=>{
+    rolloverTimer=setTimeout(()=>{
       t.done=false; t.done_at=null; t.due_date=newDue;
       save(); refresh();
       showToast(`Repeats again on ${newDue}`,'🔁');
@@ -2385,7 +2469,18 @@ function toggleDone(id,el){
   if(t.done){
     const rect=el?el.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2};
     launchConfetti(rect.left+rect.width/2, rect.top+rect.height/2);
-    showToast('Task completed! 🎉','🎊');
+    showToast('Task completed! 🎉','🎊',{
+      onUndo:()=>{
+        if(rolloverTimer) clearTimeout(rolloverTimer);
+        const current=allTasks.find(x=>x.id===id);
+        if(!current) return;
+        current.done=prevState.done;
+        current.done_at=prevState.done_at;
+        current.due_date=prevState.due_date;
+        save(); refresh();
+        showToast('Undone','↩️');
+      }
+    });
   }
 }
 
@@ -2460,6 +2555,13 @@ function saveEdit(id){
     setTimeout(()=>{f.style.borderColor=''},800);
     return;
   }
+
+  // snapshot prior editable fields so the edit can be undone
+  const prevState={
+    title:t.title,notes:t.notes,priority:t.priority,
+    due_date:t.due_date,category:t.category,recurrence:t.recurrence
+  };
+
   t.title=title;
   t.notes=document.getElementById('editNotes_'+id).value.trim();
   t.priority=document.getElementById('editPriority_'+id).value;
@@ -2470,7 +2572,15 @@ function saveEdit(id){
     : '';
   editingId=null;
   save(); refresh();
-  showToast('Task updated','✏️');
+  showToast('Task updated','✏️',{
+    onUndo:()=>{
+      const current=allTasks.find(x=>x.id===id);
+      if(!current) return;
+      Object.assign(current,prevState);
+      save(); refresh();
+      showToast('Edit undone','↩️');
+    }
+  });
 }
 
 /* ════════════════════════════════
