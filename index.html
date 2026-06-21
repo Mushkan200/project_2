@@ -115,7 +115,9 @@ body{animation:pageIn .6s var(--ease) both}
 }
 
 /* ── 3D TILT on cards ── */
-.stat-card,.panel{transform-style:preserve-3d;will-change:transform}
+/* scoped to stat-card only: .panel never used this and it was creating a
+   containing block that trapped position:fixed children (e.g. the date picker) */
+.stat-card{transform-style:preserve-3d;will-change:transform}
 
 /* everything above particles */
 nav,main,.hero,.stats-row,.main-wrap{position:relative;z-index:2}
@@ -483,7 +485,7 @@ nav{
 .date-clear:hover{background:var(--red);color:#fff}
 
 .date-popover{
-  position:absolute;top:calc(100% + 8px);left:0;z-index:500;
+  position:fixed;top:0;left:0;z-index:500;
   width:280px;background:var(--card2);border:1px solid var(--border);
   border-radius:18px;padding:14px;box-shadow:0 20px 56px rgba(0,0,0,.45);
   opacity:0;visibility:hidden;transform:translateY(-8px) scale(.97);
@@ -491,7 +493,7 @@ nav{
   transform-origin:top left;
 }
 .date-popover.show{opacity:1;visibility:visible;transform:none}
-.date-popover.align-right{left:auto;right:0;transform-origin:top right}
+.date-popover.align-right{transform-origin:top right}
 
 .date-pop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .date-pop-nav{
@@ -2344,6 +2346,21 @@ function shiftDatePopoverMonth(inputId,delta){
   renderDatePopoverGrid(inputId);
 }
 
+function positionDesktopPopover(pop,fieldEl){
+  const r=fieldEl.getBoundingClientRect();
+  // reset alignment class before measuring so width is the natural 280px
+  pop.classList.remove('align-right');
+  pop.style.top=(r.bottom+8)+'px';
+  pop.style.left=r.left+'px';
+  // flip to right-aligned if it would overflow the viewport
+  const popRect=pop.getBoundingClientRect();
+  if(popRect.right>window.innerWidth-12){
+    pop.classList.add('align-right');
+    pop.style.left='';
+    pop.style.right=(window.innerWidth-r.right)+'px';
+  }
+}
+
 function openDatePickerFor(inputId){
   closeAllDatePickers();
   const wrap=document.getElementById('dateField_'+inputId);
@@ -2351,21 +2368,22 @@ function openDatePickerFor(inputId){
   if(!wrap||!input) return;
 
   const pop=buildDatePopover(inputId);
-  wrap.appendChild(pop);
+  // append to body, not the field, so the popover is never trapped by an
+  // ancestor's overflow/transform/will-change (e.g. .panel) — this is what
+  // was silently breaking the picker on mobile
+  document.body.appendChild(pop);
   wrap.classList.add('open');
 
   const iso=isoFromInput(inputId);
   const base=iso?new Date(iso+'T00:00:00'):new Date();
-  openDatePicker={inputId,popoverEl:pop,viewYear:base.getFullYear(),viewMonth:base.getMonth(),yearViewOpen:false};
+  openDatePicker={inputId,popoverEl:pop,fieldEl:wrap,viewYear:base.getFullYear(),viewMonth:base.getMonth(),yearViewOpen:false};
   renderDatePopoverGrid(inputId);
 
-  // flip to align right if it would overflow the viewport (desktop only)
   requestAnimationFrame(()=>{
     if(window.innerWidth>720){
-      const r=pop.getBoundingClientRect();
-      if(r.right>window.innerWidth-12) pop.classList.add('align-right');
+      positionDesktopPopover(pop,wrap);
     } else {
-      // lock background scroll while the mobile sheet is open
+      // mobile: CSS handles position as a fixed bottom sheet; lock background scroll
       document.body.style.overflow='hidden';
     }
     pop.classList.add('show');
@@ -2398,6 +2416,9 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape') closeAllDatePickers();
+});
+window.addEventListener('resize',()=>{
+  if(openDatePicker) closeAllDatePickers();
 });
 
 /* ════════════════════════════════
